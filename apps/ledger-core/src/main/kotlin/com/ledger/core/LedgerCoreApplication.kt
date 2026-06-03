@@ -1,4 +1,4 @@
-package com.ledger.ledger
+package com.ledger.core
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication

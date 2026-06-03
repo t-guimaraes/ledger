@@ -1,4 +1,4 @@
-package com.ledger.ledger
+package com.ledger
 
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection
