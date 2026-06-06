@@ -1,4 +1,4 @@
-package com.tguimaraes.ledger.core.adapters.input.http
+package com.tguimaraes.ledger.core.adapters.input.web
 
 import com.tguimaraes.ledger.core.application.usecase.GetAccountBalanceUseCase
 import org.springframework.web.bind.annotation.GetMapping

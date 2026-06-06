@@ -1,4 +1,4 @@
-package com.tguimaraes.ledger.core.adapters.input.http
+package com.tguimaraes.ledger.core.adapters.input.web
 
 import com.tguimaraes.ledger.core.application.dto.CreateTransferRequest
 import com.tguimaraes.ledger.core.application.port.input.CreateTransferInputPort
