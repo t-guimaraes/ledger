@@ -7,5 +7,6 @@ data class Account(
     val id: UUID,
     val ownerName: String,
     val createdAt: Instant,
+    val updatedAt: Instant?,
     val version: Long = 0
 )

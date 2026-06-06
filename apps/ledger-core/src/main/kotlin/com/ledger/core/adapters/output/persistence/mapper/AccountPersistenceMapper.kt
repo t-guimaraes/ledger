@@ -10,6 +10,7 @@ object AccountPersistenceMapper {
             id = entity.id,
             ownerName = entity.ownerName,
             createdAt = entity.createdAt,
+            updatedAt = entity.updatedAt,
             version = entity.version
         )
     }
@@ -19,6 +20,7 @@ object AccountPersistenceMapper {
             id = domain.id,
             ownerName = domain.ownerName,
             createdAt = domain.createdAt,
+            updatedAt = domain.updatedAt,
             version = domain.version
         )
     }

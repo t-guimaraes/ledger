@@ -3,6 +3,7 @@ package com.ledger.core.adapters.output.persistence.entity
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import jakarta.persistence.Version
 import java.time.Instant
 import java.util.UUID
 
@@ -17,5 +18,8 @@ class AccountJpaEntity(
 
     val createdAt: Instant,
 
-    val version: Long
+    val updatedAt: Instant?,
+
+    @Version
+    val version: Long = 0
 )
