@@ -1,6 +1,8 @@
 package com.tguimaraes.ledger.core.domain.service
 
 import com.tguimaraes.ledger.core.domain.dto.TransferResult
+import com.tguimaraes.ledger.core.domain.exception.InvalidTransferAmountException
+import com.tguimaraes.ledger.core.domain.exception.SameAccountTransferException
 import com.tguimaraes.ledger.core.domain.model.Account
 import com.tguimaraes.ledger.core.domain.model.Entry
 import com.tguimaraes.ledger.core.domain.model.EntryType
@@ -17,6 +19,12 @@ class TransferDomainService {
         toAccount: Account,
         amount: BigDecimal
     ): TransferResult {
+
+        validateAmount(amount)
+        validateAccounts(
+            fromAccount,
+            toAccount
+        )
 
         val transaction = Transaction(
             id = UUID.randomUUID(),
@@ -48,5 +56,22 @@ class TransferDomainService {
             transaction = transaction,
             entries = entries
         )
+    }
+
+    private fun validateAmount(
+        amount: BigDecimal
+    ) {
+        if (amount <= BigDecimal.ZERO) {
+            throw InvalidTransferAmountException()
+        }
+    }
+
+    private fun validateAccounts(
+        fromAccount: Account,
+        toAccount: Account
+    ) {
+        if (fromAccount.id == toAccount.id) {
+            throw SameAccountTransferException()
+        }
     }
 }
