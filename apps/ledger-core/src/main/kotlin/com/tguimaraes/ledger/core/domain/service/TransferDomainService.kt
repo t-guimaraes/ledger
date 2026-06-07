@@ -13,7 +13,6 @@ import java.math.BigDecimal
 import java.time.Instant
 import java.util.UUID
 
-@Component
 class TransferDomainService {
     fun createTransfer(
         fromAccount: Account,
