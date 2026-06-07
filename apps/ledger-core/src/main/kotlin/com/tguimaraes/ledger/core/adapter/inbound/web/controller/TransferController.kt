@@ -2,7 +2,7 @@ package com.tguimaraes.ledger.core.adapter.inbound.web.controller
 
 import com.tguimaraes.ledger.core.adapter.inbound.web.doc.TransferApi
 import com.tguimaraes.ledger.core.adapter.inbound.web.dto.CreateTransferRequest
-import com.tguimaraes.ledger.core.application.mapper.TransferWebMapper
+import com.tguimaraes.ledger.core.adapter.inbound.web.mapper.TransferMapper
 import com.tguimaraes.ledger.core.application.port.input.CreateTransferInputPort
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
@@ -21,7 +21,7 @@ class TransferController(
         @Valid @RequestBody request: CreateTransferRequest
     ) {
         createTransferInputPort.transfer(
-            TransferWebMapper.toCommand(request),
+            TransferMapper.toCommand(request),
             idempotencyKey)
     }
 }
