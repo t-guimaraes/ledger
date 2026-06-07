@@ -6,11 +6,14 @@ import com.tguimaraes.ledger.core.application.port.output.AccountRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.EntryRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.IdempotencyPort
 import com.tguimaraes.ledger.core.application.port.output.TransactionRepositoryPort
+import com.tguimaraes.ledger.core.domain.dto.TransferResult
 import com.tguimaraes.ledger.core.domain.exception.AccountNotFoundException
 import com.tguimaraes.ledger.core.domain.exception.IdempotencyException
+import com.tguimaraes.ledger.core.domain.model.Account
 import com.tguimaraes.ledger.core.domain.model.Entry
 import com.tguimaraes.ledger.core.domain.model.EntryType
 import com.tguimaraes.ledger.core.domain.model.Transaction
+import com.tguimaraes.ledger.core.domain.service.TransferDomainService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -21,53 +24,47 @@ class CreateTransferUseCase(
     private val accountRepositoryPort: AccountRepositoryPort,
     private val transactionRepositoryPort: TransactionRepositoryPort,
     private val entryRepositoryPort: EntryRepositoryPort,
-    private val idempotencyPort: IdempotencyPort
+    private val idempotencyPort: IdempotencyPort,
+    private val transferDomainService: TransferDomainService
 ) : CreateTransferInputPort {
 
     @Transactional
     override fun transfer(request: CreateTransferCommand, idempotencyKey: String) {
+
+        validateIdempotency(idempotencyKey)
+        val fromAccount = getAccountById(request.fromAccountId)
+        val toAccount = getAccountById(request.toAccountId)
+        val transferResult = transferDomainService.createTransfer(
+            fromAccount, toAccount, request.amount
+        )
+        persistTransfer(transferResult, idempotencyKey)
+    }
+
+    fun validateIdempotency(idempotencyKey: String) {
         if (idempotencyPort.exists(idempotencyKey)) {
             throw IdempotencyException(
                 "Request already processed"
             )
         }
-
-        val fromAccount = accountRepositoryPort.findById(request.fromAccountId)
-            ?: throw AccountNotFoundException()
-
-        val toAccount = accountRepositoryPort.findById(request.toAccountId)
-            ?: throw AccountNotFoundException()
-
-        val transaction = Transaction(
-            id = UUID.randomUUID(),
-            amount = request.amount,
-            createdAt = Instant.now()
-        )
-
-        transactionRepositoryPort.save(transaction)
-
-        val entries = listOf(
-
-            Entry(
-                id = UUID.randomUUID(),
-                transactionId = transaction.id,
-                accountId = fromAccount.id,
-                type = EntryType.DEBIT,
-                amount = request.amount,
-                createdAt = Instant.now()
-            ),
-
-            Entry(
-                id = UUID.randomUUID(),
-                transactionId = transaction.id,
-                accountId = toAccount.id,
-                type = EntryType.CREDIT,
-                amount = request.amount,
-                createdAt = Instant.now()
-            )
-        )
-
-        entryRepositoryPort.saveAll(entries)
-        idempotencyPort.save(idempotencyKey)
     }
+
+    private fun getAccountById(accountId: UUID) =
+        accountRepositoryPort.findById(accountId) ?: throw AccountNotFoundException(accountId)
+
+    private fun persistTransfer(
+        transferResult: TransferResult, idempotencyKey: String
+    ) {
+        transactionRepositoryPort.save(
+            transferResult.transaction
+        )
+
+        entryRepositoryPort.saveAll(
+            transferResult.entries
+        )
+
+        idempotencyPort.save(
+            idempotencyKey
+        )
+    }
+
 }
