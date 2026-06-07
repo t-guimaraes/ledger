@@ -1,8 +1,8 @@
 package com.tguimaraes.ledger.core.application.port.input
 
-import com.tguimaraes.ledger.core.application.dto.CreateTransferRequest
+import com.tguimaraes.ledger.core.application.dto.CreateTransferCommand
 
 interface CreateTransferInputPort {
 
-    fun transfer(request: CreateTransferRequest, idempotencyKey: String)
+    fun transfer(request: CreateTransferCommand, idempotencyKey: String)
 }

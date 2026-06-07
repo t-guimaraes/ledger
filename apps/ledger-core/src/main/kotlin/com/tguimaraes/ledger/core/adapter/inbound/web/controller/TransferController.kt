@@ -1,6 +1,6 @@
-package com.tguimaraes.ledger.core.adapters.input.web
+package com.tguimaraes.ledger.core.adapter.inbound.web.controller
 
-import com.tguimaraes.ledger.core.application.dto.CreateTransferRequest
+import com.tguimaraes.ledger.core.application.dto.CreateTransferCommand
 import com.tguimaraes.ledger.core.application.port.input.CreateTransferInputPort
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
@@ -16,7 +16,7 @@ class TransferController(
     @ResponseStatus(HttpStatus.CREATED)
     fun transfer(
         @RequestHeader("Idempotency-Key") idempotencyKey: String,
-        @Valid @RequestBody request: CreateTransferRequest
+        @Valid @RequestBody request: CreateTransferCommand
     ) {
         createTransferInputPort.transfer(request, idempotencyKey)
     }

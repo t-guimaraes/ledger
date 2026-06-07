@@ -1,6 +1,6 @@
 package com.tguimaraes.ledger.core.application.usecase
 
-import com.tguimaraes.ledger.core.application.dto.CreateTransferRequest
+import com.tguimaraes.ledger.core.application.dto.CreateTransferCommand
 import com.tguimaraes.ledger.core.application.port.input.CreateTransferInputPort
 import com.tguimaraes.ledger.core.application.port.output.AccountRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.EntryRepositoryPort
@@ -25,7 +25,7 @@ class CreateTransferUseCase(
 ) : CreateTransferInputPort {
 
     @Transactional
-    override fun transfer(request: CreateTransferRequest, idempotencyKey: String) {
+    override fun transfer(request: CreateTransferCommand, idempotencyKey: String) {
         if (idempotencyPort.exists(idempotencyKey)) {
             throw IdempotencyException(
                 "Request already processed"

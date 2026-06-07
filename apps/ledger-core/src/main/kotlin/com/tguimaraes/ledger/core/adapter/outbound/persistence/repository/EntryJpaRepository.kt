@@ -1,6 +1,6 @@
-package com.tguimaraes.ledger.core.adapters.output.persistence.repository
+package com.tguimaraes.ledger.core.adapter.outbound.persistence.repository
 
-import com.tguimaraes.ledger.core.adapters.output.persistence.entity.EntryJpaEntity
+import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.EntryJpaEntity
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import java.math.BigDecimal

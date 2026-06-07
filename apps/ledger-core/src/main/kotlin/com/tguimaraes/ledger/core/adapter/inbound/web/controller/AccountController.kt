@@ -1,11 +1,11 @@
-package com.tguimaraes.ledger.core.adapters.input.web
+package com.tguimaraes.ledger.core.adapter.inbound.web.controller
 
+import com.tguimaraes.ledger.core.adapter.inbound.web.dto.BalanceResponse
 import com.tguimaraes.ledger.core.application.usecase.GetAccountBalanceUseCase
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.math.BigDecimal
 import java.util.UUID
 
 @RestController
@@ -29,7 +29,3 @@ class AccountController(
     }
 }
 
-data class BalanceResponse(
-    val accountId: UUID,
-    val balance: BigDecimal
-)

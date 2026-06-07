@@ -1,7 +1,7 @@
-package com.tguimaraes.ledger.core.adapters.output.persistence
+package com.tguimaraes.ledger.core.adapter.outbound.persistence
 
-import com.tguimaraes.ledger.core.adapters.output.persistence.mapper.TransactionPersistenceMapper
-import com.tguimaraes.ledger.core.adapters.output.persistence.repository.TransactionJpaRepository
+import com.tguimaraes.ledger.core.adapter.outbound.persistence.mapper.TransactionPersistenceMapper
+import com.tguimaraes.ledger.core.adapter.outbound.persistence.repository.TransactionJpaRepository
 import com.tguimaraes.ledger.core.application.port.output.TransactionRepositoryPort
 import com.tguimaraes.ledger.core.domain.model.Transaction
 import org.springframework.stereotype.Component

@@ -1,4 +1,4 @@
-package com.tguimaraes.ledger.core.adapters.output.redis
+package com.tguimaraes.ledger.core.adapter.outbound.cache
 
 import com.tguimaraes.ledger.core.application.port.output.IdempotencyPort
 import org.springframework.data.redis.core.StringRedisTemplate

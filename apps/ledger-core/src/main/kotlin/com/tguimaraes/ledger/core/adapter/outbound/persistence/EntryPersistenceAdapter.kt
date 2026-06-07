@@ -1,7 +1,7 @@
-package com.tguimaraes.ledger.core.adapters.output.persistence
+package com.tguimaraes.ledger.core.adapter.outbound.persistence
 
-import com.tguimaraes.ledger.core.adapters.output.persistence.mapper.EntryPersistenceMapper
-import com.tguimaraes.ledger.core.adapters.output.persistence.repository.EntryJpaRepository
+import com.tguimaraes.ledger.core.adapter.outbound.persistence.mapper.EntryPersistenceMapper
+import com.tguimaraes.ledger.core.adapter.outbound.persistence.repository.EntryJpaRepository
 import com.tguimaraes.ledger.core.application.port.output.EntryRepositoryPort
 import com.tguimaraes.ledger.core.domain.model.Entry
 import org.springframework.stereotype.Component

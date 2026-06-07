@@ -1,4 +1,4 @@
-package com.tguimaraes.ledger.core.adapters.output.persistence.entity
+package com.tguimaraes.ledger.core.adapter.outbound.persistence.entity
 
 
 import com.tguimaraes.ledger.core.domain.model.EntryType

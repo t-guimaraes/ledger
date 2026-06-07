@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull
 import java.math.BigDecimal
 import java.util.UUID
 
-data class CreateTransferRequest(
+data class CreateTransferCommand(
 
     @field:NotNull
     val fromAccountId: UUID,

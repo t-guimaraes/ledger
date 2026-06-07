@@ -1,6 +1,6 @@
-package com.tguimaraes.ledger.core.adapters.output.persistence.mapper
+package com.tguimaraes.ledger.core.adapter.outbound.persistence.mapper
 
-import com.tguimaraes.ledger.core.adapters.output.persistence.entity.AccountJpaEntity
+import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.AccountJpaEntity
 import com.tguimaraes.ledger.core.domain.model.Account
 
 object AccountPersistenceMapper {
