@@ -2,6 +2,7 @@ package com.tguimaraes.ledger.core.adapter.inbound.web.controller
 
 import com.tguimaraes.ledger.core.adapter.inbound.web.doc.AccountApi
 import com.tguimaraes.ledger.core.adapter.inbound.web.dto.BalanceResponse
+import com.tguimaraes.ledger.core.adapter.inbound.web.mapper.AccountMapper
 import com.tguimaraes.ledger.core.application.port.input.GetAccountBalanceInputPort
 import io.swagger.v3.oas.annotations.Parameter
 import org.springframework.web.bind.annotation.GetMapping
@@ -24,11 +25,7 @@ class AccountController(
         )
         @PathVariable accountId: UUID
     ): BalanceResponse {
-
-        return BalanceResponse(
-            accountId = accountId,
-            balance = getAccountBalanceInputPort.execute(accountId)
-        )
+        return AccountMapper.toResponse(getAccountBalanceInputPort.execute(accountId))
     }
 }
 

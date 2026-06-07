@@ -3,6 +3,7 @@ package com.tguimaraes.ledger.core.application.usecase
 import com.tguimaraes.ledger.core.application.dto.CreateTransferCommand
 import com.tguimaraes.ledger.core.application.port.input.CreateTransferInputPort
 import com.tguimaraes.ledger.core.application.port.output.AccountRepositoryPort
+import com.tguimaraes.ledger.core.application.port.output.EntryQueryPort
 import com.tguimaraes.ledger.core.application.port.output.EntryRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.IdempotencyPort
 import com.tguimaraes.ledger.core.application.port.output.TransactionRepositoryPort
@@ -24,6 +25,7 @@ class CreateTransferUseCase(
     private val accountRepositoryPort: AccountRepositoryPort,
     private val transactionRepositoryPort: TransactionRepositoryPort,
     private val entryRepositoryPort: EntryRepositoryPort,
+    private val entryQueryPort: EntryQueryPort,
     private val idempotencyPort: IdempotencyPort,
     private val transferDomainService: TransferDomainService
 ) : CreateTransferInputPort {
@@ -36,7 +38,7 @@ class CreateTransferUseCase(
         val toAccount = getAccountById(command.toAccountId)
 
         val balance =
-            entryRepositoryPort.getBalance(
+            entryQueryPort.getBalance(
                 fromAccount.id
             )
 
