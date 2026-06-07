@@ -34,9 +34,19 @@ class CreateTransferUseCase(
         validateIdempotency(idempotencyKey)
         val fromAccount = getAccountById(request.fromAccountId)
         val toAccount = getAccountById(request.toAccountId)
+
+        val balance =
+            entryRepositoryPort.getBalance(
+                fromAccount.id
+            )
+
         val transferResult = transferDomainService.createTransfer(
-            fromAccount, toAccount, request.amount
+            fromAccount,
+            toAccount,
+            request.amount,
+            balance
         )
+
         persistTransfer(transferResult, idempotencyKey)
     }
 

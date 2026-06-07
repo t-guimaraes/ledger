@@ -5,6 +5,8 @@ import com.tguimaraes.ledger.core.adapter.outbound.persistence.repository.EntryJ
 import com.tguimaraes.ledger.core.application.port.output.EntryRepositoryPort
 import com.tguimaraes.ledger.core.domain.model.Entry
 import org.springframework.stereotype.Component
+import java.math.BigDecimal
+import java.util.UUID
 
 @Component
 class EntryPersistenceAdapter(
@@ -16,4 +18,6 @@ class EntryPersistenceAdapter(
             entries.map(EntryPersistenceMapper::toEntity)
         )
     }
+
+    override fun getBalance(accountId: UUID): BigDecimal = repository.getBalance(accountId)
 }
