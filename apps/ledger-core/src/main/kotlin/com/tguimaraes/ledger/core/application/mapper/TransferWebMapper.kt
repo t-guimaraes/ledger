@@ -1,4 +1,4 @@
-package com.tguimaraes.ledger.core.adapter.inbound.web.mapper
+package com.tguimaraes.ledger.core.application.mapper
 
 import com.tguimaraes.ledger.core.adapter.inbound.web.dto.CreateTransferRequest
 import com.tguimaraes.ledger.core.application.dto.CreateTransferCommand

@@ -29,11 +29,11 @@ class CreateTransferUseCase(
 ) : CreateTransferInputPort {
 
     @Transactional
-    override fun transfer(request: CreateTransferCommand, idempotencyKey: String) {
+    override fun transfer(command: CreateTransferCommand, idempotencyKey: String) {
 
         validateIdempotency(idempotencyKey)
-        val fromAccount = getAccountById(request.fromAccountId)
-        val toAccount = getAccountById(request.toAccountId)
+        val fromAccount = getAccountById(command.fromAccountId)
+        val toAccount = getAccountById(command.toAccountId)
 
         val balance =
             entryRepositoryPort.getBalance(
@@ -43,14 +43,14 @@ class CreateTransferUseCase(
         val transferResult = transferDomainService.createTransfer(
             fromAccount,
             toAccount,
-            request.amount,
+            command.amount,
             balance
         )
 
         persistTransfer(transferResult, idempotencyKey)
     }
 
-    fun validateIdempotency(idempotencyKey: String) {
+    private fun validateIdempotency(idempotencyKey: String) {
         if (idempotencyPort.exists(idempotencyKey)) {
             throw IdempotencyException(
                 "Request already processed"
