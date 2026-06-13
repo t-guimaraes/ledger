@@ -5,6 +5,14 @@ import com.tguimaraes.ledger.core.domain.model.Transaction
 
 object TransactionPersistenceMapper {
 
+    fun toDomain(entity: TransactionJpaEntity): Transaction {
+        return Transaction(
+            id = entity.id,
+            amount = entity.amount,
+            createdAt = entity.createdAt
+        )
+    }
+
     fun toEntity(domain: Transaction): TransactionJpaEntity {
         return TransactionJpaEntity(
             id = domain.id,

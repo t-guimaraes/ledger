@@ -18,6 +18,4 @@ class EntryPersistenceAdapter(
             entries.map(EntryPersistenceMapper::toEntity)
         )
     }
-
-    override fun getBalance(accountId: UUID): BigDecimal = repository.getBalance(accountId)
 }
