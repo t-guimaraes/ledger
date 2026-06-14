@@ -4,6 +4,7 @@ import com.tguimaraes.ledger.core.adapter.inbound.web.dto.CreateTransferRequest
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.AccountJpaEntity
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.EntryJpaEntity
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.TransactionJpaEntity
+import com.tguimaraes.ledger.core.application.dto.AccountBalanceResult
 import com.tguimaraes.ledger.core.application.dto.CreateTransferCommand
 import com.tguimaraes.ledger.core.domain.model.Account
 import com.tguimaraes.ledger.core.domain.model.Entry
@@ -150,4 +151,11 @@ object TestFixtures {
             updatedAt = UPDATED_AT,
             version = 0
         )
+
+    fun accountBalance(
+        balance: BigDecimal = BigDecimal("1500.00")
+    ) = AccountBalanceResult(
+        accountId = FROM_ACCOUNT_ID,
+        balance = balance
+    )
 }

@@ -72,7 +72,8 @@ class AccountPersistenceAdapterTest {
             repository.save(
                 match {
                     it.id == account.id &&
-                            it.ownerName == account.ownerName
+                            it.ownerName == account.ownerName &&
+                                it.version == account.version
                 }
             )
         }

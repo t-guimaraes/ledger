@@ -216,6 +216,12 @@ class CreateTransferUseCaseTest {
         }
 
         verify(exactly = 1) {
+            idempotencyPort.exists(
+                TestFixtures.IDEMPOTENCY_KEY
+            )
+        }
+
+        verify(exactly = 1) {
             idempotencyPort.save(
                 TestFixtures.IDEMPOTENCY_KEY
             )
