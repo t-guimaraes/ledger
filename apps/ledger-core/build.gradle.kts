@@ -5,6 +5,7 @@ plugins {
 
 	id("org.springframework.boot")
 	id("io.spring.dependency-management")
+	id("jacoco")
 }
 
 group = "com.ledger"
@@ -64,4 +65,21 @@ allOpen {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+tasks.jacocoTestReport {
+	classDirectories.setFrom(
+		files(
+			classDirectories.files.map {
+				fileTree(it) {
+					exclude("**/config/**")
+					exclude(
+						"**/LedgerCoreApplication.class",
+						"**/LedgerCoreApplicationKt.class"
+					)
+					exclude("**/*\$DefaultConstructorMarker*")
+				}
+			}
+		)
+	)
 }

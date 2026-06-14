@@ -5,9 +5,6 @@ import com.ninjasquad.springmockk.MockkBean
 import com.tguimaraes.ledger.core.adapter.inbound.web.exception.GlobalExceptionHandler
 import com.tguimaraes.ledger.core.application.port.input.CreateTransferInputPort
 import com.tguimaraes.ledger.core.support.TestFixtures
-import io.mockk.Runs
-import io.mockk.every
-import io.mockk.just
 import io.mockk.verify
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
