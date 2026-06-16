@@ -1,4 +1,4 @@
-package com.tguimaraes.ledger.core.integration
+package com.tguimaraes.ledger.core.integration.entry
 
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.AccountJpaEntity
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.EntryJpaEntity

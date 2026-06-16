@@ -5,6 +5,7 @@ plugins {
 
 	id("org.springframework.boot")
 	id("io.spring.dependency-management")
+	id("idea")
 	id("jacoco")
 }
 
@@ -67,3 +68,113 @@ tasks.withType<Test> {
 	useJUnitPlatform()
 }
 
+idea {
+	this.module {
+		testSources.from(
+			file("src/integrationTest/kotlin"),
+			file("src/e2eTest/kotlin")
+		)
+	}
+}
+
+jacoco {
+	toolVersion = "0.8.12"
+}
+
+sourceSets {
+	val main by getting
+	val test by getting
+
+	val integrationTest by creating {
+		kotlin.srcDir("src/integrationTest/kotlin")
+		resources.srcDir("src/integrationTest/resources")
+
+		compileClasspath += main.output + test.output + configurations.testRuntimeClasspath.get()
+		runtimeClasspath += output + compileClasspath
+	}
+
+	val e2eTest by creating {
+		kotlin.srcDir("src/e2eTest/kotlin")
+		resources.srcDir("src/e2eTest/resources")
+
+		compileClasspath += main.output + test.output + configurations.testRuntimeClasspath.get()
+		runtimeClasspath += output + compileClasspath
+	}
+}
+
+configurations {
+	val integrationTestImplementation by getting {
+		extendsFrom(configurations.testImplementation.get())
+	}
+
+	val integrationTestRuntimeOnly by getting {
+		extendsFrom(configurations.testRuntimeOnly.get())
+	}
+
+	val e2eTestImplementation by getting {
+		extendsFrom(configurations.testImplementation.get())
+	}
+
+	val e2eTestRuntimeOnly by getting {
+		extendsFrom(configurations.testRuntimeOnly.get())
+	}
+}
+
+val integrationTest = tasks.register<Test>("integrationTest") {
+	description = "Runs integration tests"
+	group = "verification"
+
+	testClassesDirs = sourceSets["integrationTest"].output.classesDirs
+	classpath = sourceSets["integrationTest"].runtimeClasspath
+
+	useJUnitPlatform()
+
+	shouldRunAfter(tasks.test)
+}
+
+val e2eTest = tasks.register<Test>("e2eTest") {
+	description = "Runs end-to-end tests"
+	group = "verification"
+
+	testClassesDirs = sourceSets["e2eTest"].output.classesDirs
+	classpath = sourceSets["e2eTest"].runtimeClasspath
+
+	useJUnitPlatform()
+
+	shouldRunAfter(integrationTest)
+}
+
+tasks.check {
+	dependsOn(tasks.test)
+	dependsOn(integrationTest)
+	dependsOn(e2eTest)
+}
+
+tasks.jacocoTestReport {
+	dependsOn(tasks.test, integrationTest, e2eTest)
+
+	executionData.setFrom(
+		fileTree(layout.buildDirectory).include(
+			"jacoco/test.exec",
+			"jacoco/integrationTest.exec",
+			"jacoco/e2eTest.exec"
+		)
+	)
+
+	reports {
+		html.required.set(true)
+		xml.required.set(true)
+	}
+}
+
+tasks.test {
+	finalizedBy(tasks.jacocoTestReport)
+}
+
+integrationTest.configure {
+	finalizedBy(tasks.jacocoTestReport)
+}
+
+e2eTest.configure {
+	finalizedBy(tasks.jacocoTestReport)
+}
