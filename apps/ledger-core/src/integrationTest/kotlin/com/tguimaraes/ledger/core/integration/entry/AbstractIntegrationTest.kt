@@ -1,10 +1,9 @@
-package com.tguimaraes.ledger.core.integration
+package com.tguimaraes.ledger.core.integration.entry
 
 import com.tguimaraes.ledger.core.TestcontainersConfiguration
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.repository.AccountJpaRepository
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.repository.EntryJpaRepository
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.repository.TransactionJpaRepository
-import com.tguimaraes.ledger.core.support.TestFixtures
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
