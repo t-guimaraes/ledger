@@ -30,14 +30,8 @@ object TestFixtures {
     val TO_ACCOUNT_ID: UUID =
         UUID.fromString("22222222-2222-2222-2222-222222222222")
 
-    val TRANSACTION_ID: UUID =
+    val TRANSACTION_ID =
         UUID.fromString("33333333-3333-3333-3333-333333333333")
-
-    val DEBIT_ENTRY_ID: UUID =
-        UUID.fromString("44444444-4444-4444-4444-444444444444")
-
-    val CREDIT_ENTRY_ID: UUID =
-        UUID.fromString("55555555-5555-5555-5555-555555555555")
 
     fun createTransferRequest(
         amount: BigDecimal = BigDecimal("100.00")
@@ -73,6 +67,12 @@ object TestFixtures {
             version = 0
         )
 
+    fun defaultAccounts() =
+        listOf(
+            fromAccountEntity(),
+            toAccountEntity()
+        )
+
     fun transaction(
         amount: BigDecimal = BigDecimal("100.00")
     ) = Transaction(
@@ -90,10 +90,11 @@ object TestFixtures {
     )
 
     fun debitEntry(
-        amount: BigDecimal = BigDecimal("100.00")
+        amount: BigDecimal = BigDecimal("100.00"),
+        transactionId: UUID = TRANSACTION_ID,
     ) = Entry(
-        id = DEBIT_ENTRY_ID,
-        transactionId = TRANSACTION_ID,
+        id = UUID.randomUUID(),
+        transactionId = transactionId,
         accountId = FROM_ACCOUNT_ID,
         type = EntryType.DEBIT,
         amount = amount,
@@ -101,10 +102,11 @@ object TestFixtures {
     )
 
     fun creditEntry(
-        amount: BigDecimal = BigDecimal("100.00")
+        amount: BigDecimal = BigDecimal("100.00"),
+        transactionId: UUID = TRANSACTION_ID,
     ) = Entry(
-        id = CREDIT_ENTRY_ID,
-        transactionId = TRANSACTION_ID,
+        id = UUID.randomUUID(),
+        transactionId = transactionId,
         accountId = TO_ACCOUNT_ID,
         type = EntryType.CREDIT,
         amount = amount,
@@ -112,22 +114,26 @@ object TestFixtures {
     )
 
     fun debitEntryEntity(
-        amount: BigDecimal = BigDecimal("100.00")
+        amount: BigDecimal = BigDecimal("100.00"),
+        account: UUID = FROM_ACCOUNT_ID,
+        transactionId: UUID = TRANSACTION_ID
     ) = EntryJpaEntity(
-        id = DEBIT_ENTRY_ID,
-        transactionId = TRANSACTION_ID,
-        accountId = FROM_ACCOUNT_ID,
+        id = UUID.randomUUID(),
+        transactionId = transactionId,
+        accountId = account,
         type = EntryType.DEBIT,
         amount = amount,
         createdAt = CREATED_AT
     )
 
     fun creditEntryEntity(
-        amount: BigDecimal = BigDecimal("100.00")
+        amount: BigDecimal = BigDecimal("100.00"),
+        account: UUID = TO_ACCOUNT_ID,
+        transactionId: UUID = TRANSACTION_ID
     ) = EntryJpaEntity(
-        id = CREDIT_ENTRY_ID,
-        transactionId = TRANSACTION_ID,
-        accountId = TO_ACCOUNT_ID,
+        id = UUID.randomUUID(),
+        transactionId = transactionId,
+        accountId = account,
         type = EntryType.CREDIT,
         amount = amount,
         createdAt = CREATED_AT
