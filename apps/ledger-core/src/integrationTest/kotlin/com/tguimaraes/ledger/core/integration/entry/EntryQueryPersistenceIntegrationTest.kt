@@ -4,6 +4,7 @@ import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.AccountJpa
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.EntryJpaEntity
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.TransactionJpaEntity
 import com.tguimaraes.ledger.core.domain.model.EntryType
+import com.tguimaraes.ledger.core.integration.AbstractIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -19,20 +20,12 @@ class EntryQueryPersistenceIntegrationTest : AbstractIntegrationTest() {
     @BeforeEach
     fun setup() {
 
-        cleanDatabase()
+        cleanEnvironment()
 
         accountId = UUID.randomUUID()
         transactionId = UUID.randomUUID()
 
-        accountRepository.save(
-            AccountJpaEntity(
-                id = accountId,
-                ownerName = "Main Account",
-                createdAt = Instant.now(),
-                updatedAt = Instant.now(),
-                version = 0
-            )
-        )
+        createAccount(accountId, "Main Account")
 
         transactionRepository.save(
             TransactionJpaEntity(
@@ -46,7 +39,7 @@ class EntryQueryPersistenceIntegrationTest : AbstractIntegrationTest() {
     @Test
     fun `should return zero when account has no entries`() {
 
-        val balance = repository.getBalance(accountId)
+        val balance = entryRepository.getBalance(accountId)
 
         assertEquals(BigDecimal.ZERO, balance)
     }
@@ -54,7 +47,7 @@ class EntryQueryPersistenceIntegrationTest : AbstractIntegrationTest() {
     @Test
     fun `should calculate balance correctly with credits and debits`() {
 
-        repository.saveAll(
+        entryRepository.saveAll(
             listOf(
                 creditEntry(
                     amount = BigDecimal("1000.00"),
@@ -67,7 +60,7 @@ class EntryQueryPersistenceIntegrationTest : AbstractIntegrationTest() {
             )
         )
 
-        val balance = repository.getBalance(accountId)
+        val balance = entryRepository.getBalance(accountId)
 
         assertEquals(BigDecimal("750.00"), balance)
     }
@@ -87,7 +80,7 @@ class EntryQueryPersistenceIntegrationTest : AbstractIntegrationTest() {
             )
         )
 
-        repository.saveAll(
+        entryRepository.saveAll(
             listOf(
                 creditEntry(
                     amount = BigDecimal("1000.00"),
@@ -100,7 +93,7 @@ class EntryQueryPersistenceIntegrationTest : AbstractIntegrationTest() {
             )
         )
 
-        val balance = repository.getBalance(accountId)
+        val balance = entryRepository.getBalance(accountId)
 
         assertEquals(BigDecimal("1000.00"), balance)
     }
@@ -108,14 +101,14 @@ class EntryQueryPersistenceIntegrationTest : AbstractIntegrationTest() {
     @Test
     fun `should calculate negative balance correctly`() {
 
-        repository.save(
+        entryRepository.save(
             debitEntry(
                 amount = BigDecimal("500.00"),
                 accountId = accountId
             )
         )
 
-        val balance = repository.getBalance(accountId)
+        val balance = entryRepository.getBalance(accountId)
 
         assertEquals(BigDecimal("-500.00"), balance)
     }
@@ -123,7 +116,7 @@ class EntryQueryPersistenceIntegrationTest : AbstractIntegrationTest() {
     @Test
     fun `should calculate balance with multiple entries`() {
 
-        repository.saveAll(
+        entryRepository.saveAll(
             listOf(
                 creditEntry(
                     amount = BigDecimal("1000.00"),
@@ -144,7 +137,7 @@ class EntryQueryPersistenceIntegrationTest : AbstractIntegrationTest() {
             )
         )
 
-        val balance = repository.getBalance(accountId)
+        val balance = entryRepository.getBalance(accountId)
 
         assertEquals(BigDecimal("1000.00"), balance)
     }
