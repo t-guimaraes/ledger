@@ -4,7 +4,7 @@ import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.AccountJpa
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.EntryJpaEntity
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.TransactionJpaEntity
 import com.tguimaraes.ledger.core.domain.model.EntryType
-import com.tguimaraes.ledger.core.integration.AbstractIntegrationTest
+import com.tguimaraes.ledger.core.integration.support.AbstractIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

@@ -6,7 +6,7 @@ import com.tguimaraes.ledger.core.domain.exception.AccountNotFoundException
 import com.tguimaraes.ledger.core.domain.exception.IdempotencyException
 import com.tguimaraes.ledger.core.domain.exception.InsufficientBalanceException
 import com.tguimaraes.ledger.core.domain.model.EntryType
-import com.tguimaraes.ledger.core.integration.AbstractIntegrationTest
+import com.tguimaraes.ledger.core.integration.support.AbstractIntegrationTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
