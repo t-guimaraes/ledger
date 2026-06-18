@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: ledger-core-test
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: true
+
+logging:
+  level:
+    org.springframework: WARN
+    org.testcontainers: WARN

@@ -3,7 +3,7 @@ package com.tguimaraes.ledger.core.integration.transfer
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.tguimaraes.ledger.core.adapter.inbound.web.dto.CreateTransferRequest
 import com.tguimaraes.ledger.core.domain.model.EntryType
-import com.tguimaraes.ledger.core.integration.AbstractIntegrationTest
+import com.tguimaraes.ledger.core.integration.support.AbstractIntegrationTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

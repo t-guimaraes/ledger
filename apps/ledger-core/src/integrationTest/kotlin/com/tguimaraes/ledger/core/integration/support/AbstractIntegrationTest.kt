@@ -1,6 +1,5 @@
-package com.tguimaraes.ledger.core.integration
+package com.tguimaraes.ledger.core.integration.support
 
-import com.tguimaraes.ledger.core.TestcontainersConfiguration
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.AccountJpaEntity
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.EntryJpaEntity
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.TransactionJpaEntity
@@ -8,15 +7,18 @@ import com.tguimaraes.ledger.core.adapter.outbound.persistence.repository.Accoun
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.repository.EntryJpaRepository
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.repository.TransactionJpaRepository
 import com.tguimaraes.ledger.core.domain.model.EntryType
+import com.tguimaraes.ledger.core.support.TestcontainersConfiguration
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.data.redis.core.StringRedisTemplate
+import org.springframework.test.context.ActiveProfiles
 import java.math.BigDecimal
 import java.time.Instant
 import java.util.UUID
 
 @SpringBootTest
+@ActiveProfiles("test")
 @Import(TestcontainersConfiguration::class)
 abstract class AbstractIntegrationTest {
 
