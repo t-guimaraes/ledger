@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 
-class AccountMapperTest {
+class AccountBalanceMapperTest {
     @Test
     fun `should map account balance result to balance response`() {
 
@@ -15,7 +15,7 @@ class AccountMapperTest {
             balance = BigDecimal("1500.00")
         )
 
-        val response = AccountMapper.toResponse(result)
+        val response = AccountBalanceMapper.toResponse(result)
 
         assertEquals(result.accountId, response.accountId)
         assertEquals(result.balance, response.balance)

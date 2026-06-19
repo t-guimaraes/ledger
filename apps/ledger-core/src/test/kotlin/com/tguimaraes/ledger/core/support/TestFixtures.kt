@@ -6,6 +6,7 @@ import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.EntryJpaEn
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.TransactionJpaEntity
 import com.tguimaraes.ledger.core.application.dto.AccountBalanceResult
 import com.tguimaraes.ledger.core.application.dto.CreateTransferCommand
+import com.tguimaraes.ledger.core.application.dto.StatementEntryResult
 import com.tguimaraes.ledger.core.domain.model.Account
 import com.tguimaraes.ledger.core.domain.model.Entry
 import com.tguimaraes.ledger.core.domain.model.EntryType
@@ -163,5 +164,15 @@ object TestFixtures {
     ) = AccountBalanceResult(
         accountId = FROM_ACCOUNT_ID,
         balance = balance
+    )
+
+    fun statementEntryResult(
+        amount: BigDecimal = BigDecimal("100.00"),
+        type: EntryType = EntryType.CREDIT,
+    ) = StatementEntryResult(
+        transactionId = UUID.randomUUID(),
+        type = type,
+        amount = amount,
+        createdAt = CREATED_AT
     )
 }
