@@ -1,10 +1,10 @@
 package com.tguimaraes.ledger.core.application.usecase
 
-import com.tguimaraes.ledger.core.application.port.output.AccountRepositoryPort
-import com.tguimaraes.ledger.core.application.port.output.EntryQueryPort
-import com.tguimaraes.ledger.core.application.port.output.EntryRepositoryPort
-import com.tguimaraes.ledger.core.application.port.output.IdempotencyPort
-import com.tguimaraes.ledger.core.application.port.output.TransactionRepositoryPort
+import com.tguimaraes.ledger.core.application.port.output.repository.AccountRepositoryPort
+import com.tguimaraes.ledger.core.application.port.output.query.EntryQueryPort
+import com.tguimaraes.ledger.core.application.port.output.repository.EntryRepositoryPort
+import com.tguimaraes.ledger.core.application.port.output.cache.IdempotencyCachePort
+import com.tguimaraes.ledger.core.application.port.output.repository.TransactionRepositoryPort
 import com.tguimaraes.ledger.core.domain.dto.TransferResult
 import com.tguimaraes.ledger.core.domain.exception.AccountNotFoundException
 import com.tguimaraes.ledger.core.domain.exception.IdempotencyException
@@ -28,7 +28,7 @@ class CreateTransferUseCaseTest {
     private lateinit var transactionRepositoryPort: TransactionRepositoryPort
     private lateinit var entryRepositoryPort: EntryRepositoryPort
     private lateinit var entryQueryPort: EntryQueryPort
-    private lateinit var idempotencyPort: IdempotencyPort
+    private lateinit var idempotencyCachePort: IdempotencyCachePort
     private lateinit var transferDomainService: TransferDomainService
 
     private lateinit var useCase: CreateTransferUseCase
@@ -40,7 +40,7 @@ class CreateTransferUseCaseTest {
         transactionRepositoryPort = mockk(relaxed = true)
         entryRepositoryPort = mockk(relaxed = true)
         entryQueryPort = mockk()
-        idempotencyPort = mockk(relaxed = true)
+        idempotencyCachePort = mockk(relaxed = true)
         transferDomainService = mockk()
 
         useCase = CreateTransferUseCase(
@@ -48,7 +48,7 @@ class CreateTransferUseCaseTest {
             transactionRepositoryPort,
             entryRepositoryPort,
             entryQueryPort,
-            idempotencyPort,
+            idempotencyCachePort,
             transferDomainService
         )
     }
@@ -57,7 +57,7 @@ class CreateTransferUseCaseTest {
     fun `should throw when request already processed`() {
 
         every {
-            idempotencyPort.exists(
+            idempotencyCachePort.exists(
                 TestFixtures.IDEMPOTENCY_KEY
             )
         } returns true
@@ -72,7 +72,7 @@ class CreateTransferUseCaseTest {
         }
 
         verify(exactly = 1) {
-            idempotencyPort.exists(
+            idempotencyCachePort.exists(
                 TestFixtures.IDEMPOTENCY_KEY
             )
         }
@@ -82,7 +82,7 @@ class CreateTransferUseCaseTest {
     fun `should throw when source account does not exist`() {
 
         every {
-            idempotencyPort.exists(any())
+            idempotencyCachePort.exists(any())
         } returns false
 
         every {
@@ -111,7 +111,7 @@ class CreateTransferUseCaseTest {
     fun `should throw when destination account does not exist`() {
 
         every {
-            idempotencyPort.exists(any())
+            idempotencyCachePort.exists(any())
         } returns false
 
         every {
@@ -168,7 +168,7 @@ class CreateTransferUseCaseTest {
         )
 
         every {
-            idempotencyPort.exists(any())
+            idempotencyCachePort.exists(any())
         } returns false
 
         every {
@@ -216,13 +216,13 @@ class CreateTransferUseCaseTest {
         }
 
         verify(exactly = 1) {
-            idempotencyPort.exists(
+            idempotencyCachePort.exists(
                 TestFixtures.IDEMPOTENCY_KEY
             )
         }
 
         verify(exactly = 1) {
-            idempotencyPort.save(
+            idempotencyCachePort.save(
                 TestFixtures.IDEMPOTENCY_KEY
             )
         }
@@ -230,7 +230,7 @@ class CreateTransferUseCaseTest {
         confirmVerified(
             transactionRepositoryPort,
             entryRepositoryPort,
-            idempotencyPort
+            idempotencyCachePort
         )
     }
 }

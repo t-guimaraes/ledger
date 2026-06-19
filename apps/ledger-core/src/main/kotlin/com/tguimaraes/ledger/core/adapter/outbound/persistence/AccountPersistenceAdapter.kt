@@ -2,7 +2,7 @@ package com.tguimaraes.ledger.core.adapter.outbound.persistence
 
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.mapper.AccountPersistenceMapper
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.repository.AccountJpaRepository
-import com.tguimaraes.ledger.core.application.port.output.AccountRepositoryPort
+import com.tguimaraes.ledger.core.application.port.output.repository.AccountRepositoryPort
 import com.tguimaraes.ledger.core.domain.model.Account
 import org.springframework.stereotype.Component
 import java.util.UUID

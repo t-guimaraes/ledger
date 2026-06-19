@@ -24,4 +24,8 @@ interface EntryJpaRepository :
         WHERE e.accountId = :accountId
     """)
     fun getBalance(accountId: UUID): BigDecimal
+
+    fun findAllByAccountIdOrderByCreatedAtDesc(
+        accountId: UUID
+    ): List<EntryJpaEntity>
 }

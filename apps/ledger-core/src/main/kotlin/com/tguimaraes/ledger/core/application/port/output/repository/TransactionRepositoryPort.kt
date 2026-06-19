@@ -1,4 +1,4 @@
-package com.tguimaraes.ledger.core.application.port.output
+package com.tguimaraes.ledger.core.application.port.output.repository
 
 import com.tguimaraes.ledger.core.domain.model.Transaction
 

@@ -1,8 +1,8 @@
 package com.tguimaraes.ledger.core.adapter.inbound.web.doc
 
-import com.tguimaraes.ledger.core.adapter.inbound.web.dto.BalanceResponse
+import com.tguimaraes.ledger.core.adapter.inbound.web.dto.AccountStatementResponse
+import com.tguimaraes.ledger.core.adapter.inbound.web.dto.AccountBalanceResponse
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import java.util.UUID
 
@@ -15,5 +15,13 @@ interface AccountApi {
     )
     fun getBalance(
         accountId: UUID,
-    ): BalanceResponse
+    ): AccountBalanceResponse
+
+    @Operation(
+        summary = "Get account statement",
+        description = "Returns current account statement"
+    )
+    fun getStatement(
+        accountId: UUID,
+    ): AccountStatementResponse
 }

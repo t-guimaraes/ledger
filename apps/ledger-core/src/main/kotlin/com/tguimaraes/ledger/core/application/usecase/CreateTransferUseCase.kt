@@ -2,22 +2,17 @@ package com.tguimaraes.ledger.core.application.usecase
 
 import com.tguimaraes.ledger.core.application.dto.CreateTransferCommand
 import com.tguimaraes.ledger.core.application.port.input.CreateTransferInputPort
-import com.tguimaraes.ledger.core.application.port.output.AccountRepositoryPort
-import com.tguimaraes.ledger.core.application.port.output.EntryQueryPort
-import com.tguimaraes.ledger.core.application.port.output.EntryRepositoryPort
-import com.tguimaraes.ledger.core.application.port.output.IdempotencyPort
-import com.tguimaraes.ledger.core.application.port.output.TransactionRepositoryPort
+import com.tguimaraes.ledger.core.application.port.output.repository.AccountRepositoryPort
+import com.tguimaraes.ledger.core.application.port.output.query.EntryQueryPort
+import com.tguimaraes.ledger.core.application.port.output.repository.EntryRepositoryPort
+import com.tguimaraes.ledger.core.application.port.output.cache.IdempotencyCachePort
+import com.tguimaraes.ledger.core.application.port.output.repository.TransactionRepositoryPort
 import com.tguimaraes.ledger.core.domain.dto.TransferResult
 import com.tguimaraes.ledger.core.domain.exception.AccountNotFoundException
 import com.tguimaraes.ledger.core.domain.exception.IdempotencyException
-import com.tguimaraes.ledger.core.domain.model.Account
-import com.tguimaraes.ledger.core.domain.model.Entry
-import com.tguimaraes.ledger.core.domain.model.EntryType
-import com.tguimaraes.ledger.core.domain.model.Transaction
 import com.tguimaraes.ledger.core.domain.service.TransferDomainService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.Instant
 import java.util.UUID
 
 @Service
@@ -26,7 +21,7 @@ class CreateTransferUseCase(
     private val transactionRepositoryPort: TransactionRepositoryPort,
     private val entryRepositoryPort: EntryRepositoryPort,
     private val entryQueryPort: EntryQueryPort,
-    private val idempotencyPort: IdempotencyPort,
+    private val idempotencyCachePort: IdempotencyCachePort,
     private val transferDomainService: TransferDomainService
 ) : CreateTransferInputPort {
 
@@ -53,7 +48,7 @@ class CreateTransferUseCase(
     }
 
     private fun validateIdempotency(idempotencyKey: String) {
-        if (idempotencyPort.exists(idempotencyKey)) {
+        if (idempotencyCachePort.exists(idempotencyKey)) {
             throw IdempotencyException(
                 "Request already processed"
             )
@@ -74,7 +69,7 @@ class CreateTransferUseCase(
             transferResult.entries
         )
 
-        idempotencyPort.save(
+        idempotencyCachePort.save(
             idempotencyKey
         )
     }

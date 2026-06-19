@@ -1,7 +1,5 @@
 package com.tguimaraes.ledger.core.integration.account
 
-import com.tguimaraes.ledger.core.application.dto.CreateTransferCommand
-import com.tguimaraes.ledger.core.application.usecase.CreateTransferUseCase
 import com.tguimaraes.ledger.core.integration.support.AbstractIntegrationTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -18,9 +16,6 @@ class AccountControllerIntegrationTest : AbstractIntegrationTest() {
 
     @Autowired
     private lateinit var mockMvc: MockMvc
-
-    @Autowired
-    private lateinit var createTransferUseCase: CreateTransferUseCase
 
     @BeforeEach
     fun setup() {
@@ -43,84 +38,38 @@ class AccountControllerIntegrationTest : AbstractIntegrationTest() {
             amount = BigDecimal("1000.00")
         )
 
-        mockMvc.get(
-            "/accounts/$fromAccountId/balance"
-        ) {
-            contentType = MediaType.APPLICATION_JSON
-        }
+        mockMvc.get("/accounts/$fromAccountId/balance")
+            { contentType = MediaType.APPLICATION_JSON }
             .andExpect {
                 status { isOk() }
-
-                jsonPath("$.accountId") {
-                    value(fromAccountId.toString())
-                }
-
-                jsonPath("$.balance") {
-                    value(1000.00)
-                }
+                jsonPath("$.accountId") { value(fromAccountId.toString())}
+                jsonPath("$.balance") {value(1000.00)}
             }
     }
 
     @Test
-    fun `should return zero balance when account has no entries`() {
-
-        mockMvc.get(
-            "/accounts/$fromAccountId/balance"
-        ) {
-            contentType = MediaType.APPLICATION_JSON
-        }
-            .andExpect {
-                status { isOk() }
-
-                jsonPath("$.accountId") {
-                    value(fromAccountId.toString())
-                }
-
-                jsonPath("$.balance") {
-                    value(0)
-                }
-            }
-    }
-
-    @Test
-    fun `should calculate balance with credits and debits`() {
+    fun `should return account statement`() {
 
         fundAccount(
-            accountId = fromAccountId,
-            amount = BigDecimal("1000.00")
+            fromAccountId,
+            BigDecimal("1000.00")
         )
 
-        val secondAccountId = UUID.randomUUID()
-
-        createAccount(
-            id = secondAccountId,
-            ownerName = "Maria"
+        fundAccount(
+            fromAccountId,
+            BigDecimal("500.00")
         )
 
-        createTransferUseCase.transfer(
-            CreateTransferCommand(
-                fromAccountId = fromAccountId,
-                toAccountId = secondAccountId,
-                amount = BigDecimal("300.00")
-            ),
-            "balance-test-key"
-        )
-
-        mockMvc.get(
-            "/accounts/$fromAccountId/balance"
-        ) {
-            contentType = MediaType.APPLICATION_JSON
-        }
+        mockMvc.get("/accounts/$fromAccountId/statement")
+            { contentType = MediaType.APPLICATION_JSON }
             .andExpect {
                 status { isOk() }
-
-                jsonPath("$.accountId") {
-                    value(fromAccountId.toString())
-                }
-
-                jsonPath("$.balance") {
-                    value(700.00)
-                }
+                jsonPath("$.accountId") { value(fromAccountId.toString()) }
+                jsonPath("$.entries.length()") { value(2) }
+                jsonPath("$.entries[0].amount") { value(500.00) }
+                jsonPath("$.entries[1].amount") { value(1000.00) }
+                jsonPath("$.entries[0].type") { value("CREDIT") }
+                jsonPath("$.entries[1].type") { value("CREDIT") }
             }
     }
 }

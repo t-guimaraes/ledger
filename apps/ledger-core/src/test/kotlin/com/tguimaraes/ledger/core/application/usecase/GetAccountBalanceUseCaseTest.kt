@@ -1,6 +1,6 @@
 package com.tguimaraes.ledger.core.application.usecase
 
-import com.tguimaraes.ledger.core.application.port.output.EntryQueryPort
+import com.tguimaraes.ledger.core.application.port.output.query.EntryQueryPort
 import com.tguimaraes.ledger.core.support.TestFixtures
 import io.mockk.every
 import io.mockk.mockk
