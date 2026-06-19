@@ -14,11 +14,11 @@ class RedisIdempotencyAdapterTest {
     private val redisTemplate = mockk<StringRedisTemplate>()
     private val valueOperations = mockk<ValueOperations<String, String>>()
 
-    private lateinit var adapter: RedisIdempotencyAdapter
+    private lateinit var adapter: RedisIdempotencyCacheAdapter
 
     @BeforeEach
     fun setup() {
-        adapter = RedisIdempotencyAdapter(redisTemplate)
+        adapter = RedisIdempotencyCacheAdapter(redisTemplate)
     }
 
     @Test
