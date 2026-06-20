@@ -5,7 +5,7 @@ import com.tguimaraes.ledger.core.application.port.input.CreateTransferInputPort
 import com.tguimaraes.ledger.core.application.port.output.repository.AccountRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.query.EntryQueryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.EntryRepositoryPort
-import com.tguimaraes.ledger.core.application.port.output.cache.IdempotencyCachePort
+import com.tguimaraes.ledger.core.application.port.output.idempotency.IdempotencyPort
 import com.tguimaraes.ledger.core.application.port.output.repository.TransactionRepositoryPort
 import com.tguimaraes.ledger.core.domain.dto.TransferResult
 import com.tguimaraes.ledger.core.domain.exception.AccountNotFoundException
@@ -18,7 +18,7 @@ class CreateTransferUseCase(
     private val transactionRepositoryPort: TransactionRepositoryPort,
     private val entryRepositoryPort: EntryRepositoryPort,
     private val entryQueryPort: EntryQueryPort,
-    private val idempotencyCachePort: IdempotencyCachePort,
+    private val idempotencyPort: IdempotencyPort,
     private val transferDomainService: TransferDomainService
 ) : CreateTransferInputPort {
 
@@ -44,7 +44,7 @@ class CreateTransferUseCase(
     }
 
     private fun validateIdempotency(idempotencyKey: String) {
-        if (idempotencyCachePort.exists(idempotencyKey)) {
+        if (idempotencyPort.exists(idempotencyKey)) {
             throw IdempotencyException(
                 "Request already processed"
             )
@@ -65,7 +65,7 @@ class CreateTransferUseCase(
             transferResult.entries
         )
 
-        idempotencyCachePort.save(
+        idempotencyPort.save(
             idempotencyKey
         )
     }

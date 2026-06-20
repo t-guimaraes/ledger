@@ -82,17 +82,14 @@ class CreateTransferUseCaseIntegrationTest: AbstractIntegrationTest() {
         )
 
         assertTrue(
-            redisTemplate.hasKey("integration-key")
+            idempotencyRepository.existsById("integration-key")
         )
     }
 
     @Test
     fun `should throw exception when idempotency key already exists`() {
 
-        redisTemplate.opsForValue().set(
-            "duplicate-key",
-            "processed"
-        )
+        createIdempotencyKey("duplicate-key")
 
         assertThrows(IdempotencyException::class.java) {
             createTransferInputPort.transfer(

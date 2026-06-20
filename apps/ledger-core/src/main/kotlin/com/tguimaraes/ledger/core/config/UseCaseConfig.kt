@@ -6,8 +6,8 @@ import com.tguimaraes.ledger.core.application.port.input.CreateAccountInputPort
 import com.tguimaraes.ledger.core.application.port.input.CreateTransferInputPort
 import com.tguimaraes.ledger.core.application.port.input.GetAccountBalanceInputPort
 import com.tguimaraes.ledger.core.application.port.input.GetAccountStatementInputPort
-import com.tguimaraes.ledger.core.application.port.output.cache.IdempotencyCachePort
 import com.tguimaraes.ledger.core.application.port.output.id.IdGeneratorPort
+import com.tguimaraes.ledger.core.application.port.output.idempotency.IdempotencyPort
 import com.tguimaraes.ledger.core.application.port.output.query.EntryQueryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.AccountRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.EntryRepositoryPort
@@ -45,7 +45,7 @@ class UseCaseConfig {
         transactionRepositoryPort: TransactionRepositoryPort,
         entryRepositoryPort: EntryRepositoryPort,
         entryQueryPort: EntryQueryPort,
-        idempotencyCachePort: IdempotencyCachePort,
+        idempotencyPort: IdempotencyPort,
         transferDomainService: TransferDomainService,
         transactionManager: PlatformTransactionManager
     ): CreateTransferInputPort {
@@ -55,7 +55,7 @@ class UseCaseConfig {
                 transactionRepositoryPort,
                 entryRepositoryPort,
                 entryQueryPort,
-                idempotencyCachePort,
+                idempotencyPort,
                 transferDomainService
             ),
             TransactionTemplate(transactionManager)

@@ -106,17 +106,14 @@ class TransferControllerIntegrationTest : AbstractIntegrationTest() {
         )
 
         assertTrue(
-            redisTemplate.hasKey("integration-key")
+            idempotencyRepository.existsById("integration-key")
         )
     }
 
     @Test
     fun `should return conflict when idempotency key already exists`() {
 
-        redisTemplate.opsForValue().set(
-            "duplicate-key",
-            "processed"
-        )
+        createIdempotencyKey("duplicate-key")
 
         val request =
             CreateTransferRequest(
