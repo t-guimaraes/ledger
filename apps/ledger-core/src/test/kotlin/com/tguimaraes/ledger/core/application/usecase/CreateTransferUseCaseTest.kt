@@ -14,7 +14,9 @@ import com.tguimaraes.ledger.core.domain.service.TransferDomainService
 import com.tguimaraes.ledger.core.support.TestFixtures
 import io.mockk.confirmVerified
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
@@ -37,10 +39,10 @@ class CreateTransferUseCaseTest {
     fun setup() {
 
         accountRepositoryPort = mockk()
-        transactionRepositoryPort = mockk(relaxed = true)
-        entryRepositoryPort = mockk(relaxed = true)
+        transactionRepositoryPort = mockk()
+        entryRepositoryPort = mockk()
         entryQueryPort = mockk()
-        idempotencyCachePort = mockk(relaxed = true)
+        idempotencyCachePort = mockk()
         transferDomainService = mockk()
 
         useCase = CreateTransferUseCase(
@@ -197,6 +199,15 @@ class CreateTransferUseCaseTest {
                 any()
             )
         } returns transferResult
+        every {
+            transactionRepositoryPort.save(transaction)
+        } just runs
+        every {
+            entryRepositoryPort.saveAll(entries)
+        } just runs
+        every {
+            idempotencyCachePort.save(TestFixtures.IDEMPOTENCY_KEY)
+        } just runs
 
         useCase.transfer(
             command,

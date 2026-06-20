@@ -2,8 +2,12 @@ package com.tguimaraes.ledger.core.adapter.outbound.persistence
 
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.repository.AccountJpaRepository
 import com.tguimaraes.ledger.core.support.TestFixtures
-import io.mockk.*
-import org.junit.jupiter.api.Assertions.*
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -61,10 +65,11 @@ class AccountPersistenceAdapterTest {
     fun `should save account`() {
 
         val account = TestFixtures.fromAccount()
+        val entity = TestFixtures.fromAccountEntity()
 
         every {
             repository.save(any())
-        } answers { firstArg() }
+        } returns entity
 
         adapter.save(account)
 

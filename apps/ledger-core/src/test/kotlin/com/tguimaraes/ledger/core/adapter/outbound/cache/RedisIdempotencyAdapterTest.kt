@@ -1,6 +1,10 @@
 package com.tguimaraes.ledger.core.adapter.outbound.cache
 
-import io.mockk.*
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.runs
+import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -62,7 +66,7 @@ class RedisIdempotencyAdapterTest {
                 any(),
                 any<Duration>()
             )
-        } just Runs
+        } just runs
 
         adapter.save("key")
 

@@ -5,6 +5,9 @@ import com.ninjasquad.springmockk.MockkBean
 import com.tguimaraes.ledger.core.adapter.inbound.web.exception.GlobalExceptionHandler
 import com.tguimaraes.ledger.core.application.port.input.CreateTransferInputPort
 import com.tguimaraes.ledger.core.support.TestFixtures
+import io.mockk.every
+import io.mockk.just
+import io.mockk.runs
 import io.mockk.verify
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,7 +33,7 @@ class TransferControllerWebMvcTest(
 
 ) {
 
-    @MockkBean(relaxed = true)
+    @MockkBean
     private lateinit var createTransferInputPort: CreateTransferInputPort
 
     @Test
@@ -81,6 +84,13 @@ class TransferControllerWebMvcTest(
     fun `should call input port when request is valid`() {
 
         val request = TestFixtures.createTransferRequest()
+
+        every {
+            createTransferInputPort.transfer(
+                TestFixtures.createTransferCommand(),
+                TestFixtures.IDEMPOTENCY_KEY
+            )
+        } just runs
 
         mockMvc.perform(
             post("/transfers")

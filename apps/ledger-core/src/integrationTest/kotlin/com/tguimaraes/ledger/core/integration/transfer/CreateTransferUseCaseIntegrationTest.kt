@@ -1,7 +1,7 @@
 package com.tguimaraes.ledger.core.integration.transfer
 
-import com.tguimaraes.ledger.core.application.usecase.CreateTransferUseCase
 import com.tguimaraes.ledger.core.application.dto.CreateTransferCommand
+import com.tguimaraes.ledger.core.application.port.input.CreateTransferInputPort
 import com.tguimaraes.ledger.core.domain.exception.AccountNotFoundException
 import com.tguimaraes.ledger.core.domain.exception.IdempotencyException
 import com.tguimaraes.ledger.core.domain.exception.InsufficientBalanceException
@@ -17,7 +17,7 @@ import java.util.UUID
 class CreateTransferUseCaseIntegrationTest: AbstractIntegrationTest() {
 
     @Autowired
-    private lateinit var createTransferUseCase: CreateTransferUseCase
+    private lateinit var createTransferInputPort: CreateTransferInputPort
 
     @BeforeEach
     fun setup() {
@@ -39,7 +39,7 @@ class CreateTransferUseCaseIntegrationTest: AbstractIntegrationTest() {
     @Test
     fun `should create transfer successfully`() {
 
-        createTransferUseCase.transfer(
+        createTransferInputPort.transfer(
             CreateTransferCommand(
                 fromAccountId = fromAccountId,
                 toAccountId = toAccountId,
@@ -95,7 +95,7 @@ class CreateTransferUseCaseIntegrationTest: AbstractIntegrationTest() {
         )
 
         assertThrows(IdempotencyException::class.java) {
-            createTransferUseCase.transfer(
+            createTransferInputPort.transfer(
                 CreateTransferCommand(
                     fromAccountId = fromAccountId,
                     toAccountId = toAccountId,
@@ -113,7 +113,7 @@ class CreateTransferUseCaseIntegrationTest: AbstractIntegrationTest() {
     fun `should throw exception when source account does not exist`() {
 
         assertThrows(AccountNotFoundException::class.java) {
-            createTransferUseCase.transfer(
+            createTransferInputPort.transfer(
                 CreateTransferCommand(
                     fromAccountId = UUID.randomUUID(),
                     toAccountId = toAccountId,
@@ -128,7 +128,7 @@ class CreateTransferUseCaseIntegrationTest: AbstractIntegrationTest() {
     fun `should throw exception when destination account does not exist`() {
 
         assertThrows(AccountNotFoundException::class.java) {
-            createTransferUseCase.transfer(
+            createTransferInputPort.transfer(
                 CreateTransferCommand(
                     fromAccountId = fromAccountId,
                     toAccountId = UUID.randomUUID(),
@@ -143,7 +143,7 @@ class CreateTransferUseCaseIntegrationTest: AbstractIntegrationTest() {
     fun `should throw exception when balance is insufficient`() {
 
         assertThrows(InsufficientBalanceException::class.java) {
-            createTransferUseCase.transfer(
+            createTransferInputPort.transfer(
                 CreateTransferCommand(
                     fromAccountId = fromAccountId,
                     toAccountId = toAccountId,
