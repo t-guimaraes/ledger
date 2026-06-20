@@ -4,5 +4,5 @@ import java.util.UUID
 
 data class AccountStatementResult(
     val accountId: UUID,
-    val entries: List<StatementEntryResult>
+    val entries: List<AccountStatementEntryResult>
 )
