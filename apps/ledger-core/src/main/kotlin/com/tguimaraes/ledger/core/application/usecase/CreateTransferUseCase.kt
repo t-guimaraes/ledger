@@ -11,11 +11,8 @@ import com.tguimaraes.ledger.core.domain.dto.TransferResult
 import com.tguimaraes.ledger.core.domain.exception.AccountNotFoundException
 import com.tguimaraes.ledger.core.domain.exception.IdempotencyException
 import com.tguimaraes.ledger.core.domain.service.TransferDomainService
-import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
-@Service
 class CreateTransferUseCase(
     private val accountRepositoryPort: AccountRepositoryPort,
     private val transactionRepositoryPort: TransactionRepositoryPort,
@@ -25,7 +22,6 @@ class CreateTransferUseCase(
     private val transferDomainService: TransferDomainService
 ) : CreateTransferInputPort {
 
-    @Transactional
     override fun transfer(command: CreateTransferCommand, idempotencyKey: String) {
 
         validateIdempotency(idempotencyKey)
