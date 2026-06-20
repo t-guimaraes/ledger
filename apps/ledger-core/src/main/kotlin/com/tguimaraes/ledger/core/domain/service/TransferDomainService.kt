@@ -8,7 +8,6 @@ import com.tguimaraes.ledger.core.domain.model.Account
 import com.tguimaraes.ledger.core.domain.model.Entry
 import com.tguimaraes.ledger.core.domain.model.EntryType
 import com.tguimaraes.ledger.core.domain.model.Transaction
-import org.springframework.stereotype.Component
 import java.math.BigDecimal
 import java.time.Instant
 import java.util.UUID

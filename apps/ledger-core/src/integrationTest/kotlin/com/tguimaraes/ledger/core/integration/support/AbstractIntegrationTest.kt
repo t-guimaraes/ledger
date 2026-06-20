@@ -2,16 +2,17 @@ package com.tguimaraes.ledger.core.integration.support
 
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.AccountJpaEntity
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.EntryJpaEntity
+import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.IdempotencyKeyJpaEntity
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.TransactionJpaEntity
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.repository.AccountJpaRepository
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.repository.EntryJpaRepository
+import com.tguimaraes.ledger.core.adapter.outbound.persistence.repository.IdempotencyKeyJpaRepository
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.repository.TransactionJpaRepository
 import com.tguimaraes.ledger.core.domain.model.EntryType
 import com.tguimaraes.ledger.core.support.TestcontainersConfiguration
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
-import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.test.context.ActiveProfiles
 import java.math.BigDecimal
 import java.time.Instant
@@ -32,27 +33,29 @@ abstract class AbstractIntegrationTest {
     protected lateinit var transactionRepository: TransactionJpaRepository
 
     @Autowired
-    protected lateinit var redisTemplate: StringRedisTemplate
+    protected lateinit var idempotencyRepository: IdempotencyKeyJpaRepository
 
     protected lateinit var fromAccountId: UUID
     protected lateinit var toAccountId: UUID
 
     protected fun cleanDatabase() {
+        idempotencyRepository.deleteAll()
         entryRepository.deleteAll()
         transactionRepository.deleteAll()
         accountRepository.deleteAll()
     }
 
-    protected fun cleanRedis() {
-        redisTemplate.connectionFactory
-            ?.connection
-            ?.serverCommands()
-            ?.flushAll()
-    }
-
     protected fun cleanEnvironment() {
         cleanDatabase()
-        cleanRedis()
+    }
+
+    protected fun createIdempotencyKey(key: String) {
+        idempotencyRepository.save(
+            IdempotencyKeyJpaEntity(
+                key = key,
+                createdAt = Instant.now()
+            )
+        )
     }
 
     protected fun createAccount(id: UUID, ownerName: String) {

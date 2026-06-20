@@ -22,9 +22,9 @@ class TestcontainersConfiguration {
         return PostgreSQLContainer(DockerImageName.parse("postgres:16"))
     }
 
-    @Bean
-    @ServiceConnection(name = "redis")
-    fun redisContainer(): GenericContainer<*> {
-        return GenericContainer(DockerImageName.parse("redis:7-alpine")).withExposedPorts(6379)
-    }
+//    @Bean
+//    @ServiceConnection(name = "redis")
+//    fun redisContainer(): GenericContainer<*> {
+//        return GenericContainer(DockerImageName.parse("redis:7-alpine")).withExposedPorts(6379)
+//    }
 }

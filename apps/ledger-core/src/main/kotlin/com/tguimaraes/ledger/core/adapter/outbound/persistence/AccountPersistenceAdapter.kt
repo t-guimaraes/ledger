@@ -20,7 +20,6 @@ class AccountPersistenceAdapter(
 
     override fun save(account: Account) {
         val entity = AccountPersistenceMapper.toEntity(account)
-
         accountJpaRepository.save(entity)
     }
 }

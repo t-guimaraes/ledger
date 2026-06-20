@@ -8,7 +8,11 @@ import com.tguimaraes.ledger.core.domain.exception.SameAccountTransferException
 import com.tguimaraes.ledger.core.support.TestFixtures
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.springframework.core.MethodParameter
 import org.springframework.http.HttpStatus
+import org.springframework.validation.BeanPropertyBindingResult
+import org.springframework.validation.FieldError
+import org.springframework.web.bind.MethodArgumentNotValidException
 
 class GlobalExceptionHandlerTest {
 
@@ -21,15 +25,9 @@ class GlobalExceptionHandlerTest {
             InvalidTransferAmountException()
         )
 
-        assertEquals(
-            HttpStatus.BAD_REQUEST.value(),
-            result.status
-        )
-
-        assertEquals(
-            "Transfer amount must be greater than zero",
-            result.detail
-        )
+        assertEquals(HttpStatus.BAD_REQUEST.value(), result.statusCode.value())
+        assertEquals("BAD_REQUEST", result.body?.code)
+        assertEquals("Transfer amount must be greater than zero", result.body?.message)
     }
 
     @Test
@@ -39,88 +37,77 @@ class GlobalExceptionHandlerTest {
             SameAccountTransferException()
         )
 
-        assertEquals(
-            HttpStatus.BAD_REQUEST.value(),
-            result.status
-        )
-
-        assertEquals(
-            "Source and destination accounts must be different",
-            result.detail
-        )
+        assertEquals(HttpStatus.BAD_REQUEST.value(), result.statusCode.value())
+        assertEquals("BAD_REQUEST", result.body?.code)
+        assertEquals("Source and destination accounts must be different", result.body?.message)
     }
 
     @Test
     fun `should return not found for account not found`() {
 
-        val result = handler.handleAccountNotFound(
-            AccountNotFoundException(
-                TestFixtures.FROM_ACCOUNT_ID
-            )
+        val result = handler.handleNotFound(
+            AccountNotFoundException(TestFixtures.FROM_ACCOUNT_ID)
         )
 
-        assertEquals(
-            HttpStatus.NOT_FOUND.value(),
-            result.status
-        )
-
+        assertEquals(HttpStatus.NOT_FOUND.value(), result.statusCode.value())
+        assertEquals("ACCOUNT_NOT_FOUND", result.body?.code)
         assertEquals(
             "Account ${TestFixtures.FROM_ACCOUNT_ID} not found",
-            result.detail
+            result.body?.message
         )
     }
 
     @Test
     fun `should return unprocessable entity for insufficient balance`() {
 
-        val result = handler.handleInsufficientBalance(
+        val result = handler.handleBusiness(
             InsufficientBalanceException()
         )
 
-        assertEquals(
-            HttpStatus.UNPROCESSABLE_ENTITY.value(),
-            result.status
-        )
-
-        assertEquals(
-            "Insufficient balance",
-            result.detail
-        )
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY.value(), result.statusCode.value())
+        assertEquals("INSUFFICIENT_BALANCE", result.body?.code)
+        assertEquals("Insufficient balance", result.body?.message)
     }
 
     @Test
     fun `should return conflict for idempotency exception`() {
 
-        val result = handler.handleIdempotency(
+        val result = handler.handleConflict(
             IdempotencyException("Request already processed")
         )
 
-        assertEquals(
-            HttpStatus.CONFLICT.value(),
-            result.status
-        )
-
-        assertEquals(
-            "Request already processed",
-            result.detail
-        )
+        assertEquals(HttpStatus.CONFLICT.value(), result.statusCode.value())
+        assertEquals("IDEMPOTENCY_CONFLICT", result.body?.code)
+        assertEquals("Request already processed", result.body?.message)
     }
 
     @Test
-    fun `should use reason phrase when exception message is null`() {
+    fun `should handle validation errors`() {
+        val method = Any::class.java.getDeclaredMethod("toString")
+        val methodParameter = MethodParameter(method, -1)
 
-        val result = handler.handleBadRequest(
-            object : RuntimeException() {}
+        val bindingResult = BeanPropertyBindingResult(
+            Any(),
+            "object"
         )
 
-        assertEquals(
-            HttpStatus.BAD_REQUEST.value(),
-            result.status
+        bindingResult.addError(
+            FieldError("object", "ownerName", "must not be blank")
         )
 
-        assertEquals(
-            HttpStatus.BAD_REQUEST.reasonPhrase,
-            result.detail
+        val ex = MethodArgumentNotValidException(
+            methodParameter,
+            bindingResult
         )
+
+        val result = handler.handleValidation(ex)
+
+        assertEquals(HttpStatus.BAD_REQUEST.value(), result.statusCode.value())
+        assertEquals("VALIDATION_ERROR", result.body?.code)
+        assertEquals("Validation failed", result.body?.message)
+
+        assertEquals(1, result.body?.errors?.size)
+        assertEquals("ownerName", result.body?.errors?.first()?.field)
+        assertEquals("must not be blank", result.body?.errors?.first()?.message)
     }
 }

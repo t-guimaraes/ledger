@@ -72,4 +72,6 @@ class AccountControllerIntegrationTest : AbstractIntegrationTest() {
                 jsonPath("$.entries[1].type") { value("CREDIT") }
             }
     }
+
+
 }

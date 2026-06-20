@@ -3,7 +3,7 @@ package com.tguimaraes.ledger.core.application.usecase
 import com.tguimaraes.ledger.core.application.port.output.repository.AccountRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.query.EntryQueryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.EntryRepositoryPort
-import com.tguimaraes.ledger.core.application.port.output.cache.IdempotencyCachePort
+import com.tguimaraes.ledger.core.application.port.output.idempotency.IdempotencyPort
 import com.tguimaraes.ledger.core.application.port.output.repository.TransactionRepositoryPort
 import com.tguimaraes.ledger.core.domain.dto.TransferResult
 import com.tguimaraes.ledger.core.domain.exception.AccountNotFoundException
@@ -14,7 +14,9 @@ import com.tguimaraes.ledger.core.domain.service.TransferDomainService
 import com.tguimaraes.ledger.core.support.TestFixtures
 import io.mockk.confirmVerified
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
@@ -28,7 +30,7 @@ class CreateTransferUseCaseTest {
     private lateinit var transactionRepositoryPort: TransactionRepositoryPort
     private lateinit var entryRepositoryPort: EntryRepositoryPort
     private lateinit var entryQueryPort: EntryQueryPort
-    private lateinit var idempotencyCachePort: IdempotencyCachePort
+    private lateinit var idempotencyPort: IdempotencyPort
     private lateinit var transferDomainService: TransferDomainService
 
     private lateinit var useCase: CreateTransferUseCase
@@ -37,10 +39,10 @@ class CreateTransferUseCaseTest {
     fun setup() {
 
         accountRepositoryPort = mockk()
-        transactionRepositoryPort = mockk(relaxed = true)
-        entryRepositoryPort = mockk(relaxed = true)
+        transactionRepositoryPort = mockk()
+        entryRepositoryPort = mockk()
         entryQueryPort = mockk()
-        idempotencyCachePort = mockk(relaxed = true)
+        idempotencyPort = mockk()
         transferDomainService = mockk()
 
         useCase = CreateTransferUseCase(
@@ -48,7 +50,7 @@ class CreateTransferUseCaseTest {
             transactionRepositoryPort,
             entryRepositoryPort,
             entryQueryPort,
-            idempotencyCachePort,
+            idempotencyPort,
             transferDomainService
         )
     }
@@ -57,7 +59,7 @@ class CreateTransferUseCaseTest {
     fun `should throw when request already processed`() {
 
         every {
-            idempotencyCachePort.exists(
+            idempotencyPort.exists(
                 TestFixtures.IDEMPOTENCY_KEY
             )
         } returns true
@@ -72,7 +74,7 @@ class CreateTransferUseCaseTest {
         }
 
         verify(exactly = 1) {
-            idempotencyCachePort.exists(
+            idempotencyPort.exists(
                 TestFixtures.IDEMPOTENCY_KEY
             )
         }
@@ -82,7 +84,7 @@ class CreateTransferUseCaseTest {
     fun `should throw when source account does not exist`() {
 
         every {
-            idempotencyCachePort.exists(any())
+            idempotencyPort.exists(any())
         } returns false
 
         every {
@@ -111,7 +113,7 @@ class CreateTransferUseCaseTest {
     fun `should throw when destination account does not exist`() {
 
         every {
-            idempotencyCachePort.exists(any())
+            idempotencyPort.exists(any())
         } returns false
 
         every {
@@ -168,7 +170,7 @@ class CreateTransferUseCaseTest {
         )
 
         every {
-            idempotencyCachePort.exists(any())
+            idempotencyPort.exists(any())
         } returns false
 
         every {
@@ -197,6 +199,15 @@ class CreateTransferUseCaseTest {
                 any()
             )
         } returns transferResult
+        every {
+            transactionRepositoryPort.save(transaction)
+        } just runs
+        every {
+            entryRepositoryPort.saveAll(entries)
+        } just runs
+        every {
+            idempotencyPort.save(TestFixtures.IDEMPOTENCY_KEY)
+        } just runs
 
         useCase.transfer(
             command,
@@ -216,13 +227,13 @@ class CreateTransferUseCaseTest {
         }
 
         verify(exactly = 1) {
-            idempotencyCachePort.exists(
+            idempotencyPort.exists(
                 TestFixtures.IDEMPOTENCY_KEY
             )
         }
 
         verify(exactly = 1) {
-            idempotencyCachePort.save(
+            idempotencyPort.save(
                 TestFixtures.IDEMPOTENCY_KEY
             )
         }
@@ -230,7 +241,7 @@ class CreateTransferUseCaseTest {
         confirmVerified(
             transactionRepositoryPort,
             entryRepositoryPort,
-            idempotencyCachePort
+            idempotencyPort
         )
     }
 }

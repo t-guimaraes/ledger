@@ -1,13 +1,19 @@
 package com.tguimaraes.ledger.core.adapter.inbound.web.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
-import com.tguimaraes.ledger.core.application.dto.AccountBalanceResult
+import com.tguimaraes.ledger.core.adapter.inbound.web.dto.CreateAccountRequest
 import com.tguimaraes.ledger.core.application.dto.AccountStatementResult
+import com.tguimaraes.ledger.core.application.dto.CreateAccountCommand
+import com.tguimaraes.ledger.core.application.dto.CreateAccountResult
+import com.tguimaraes.ledger.core.application.port.input.CreateAccountInputPort
 import com.tguimaraes.ledger.core.application.port.input.GetAccountBalanceInputPort
 import com.tguimaraes.ledger.core.application.port.input.GetAccountStatementInputPort
 import com.tguimaraes.ledger.core.support.TestFixtures
 import io.mockk.every
+import io.mockk.slot
 import io.mockk.verify
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -15,20 +21,31 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import java.math.BigDecimal
 
 @WebMvcTest(AccountController::class)
 @AutoConfigureMockMvc(addFilters = false)
-class AccountControllerWebMvcTest {
+class AccountControllerWebMvcTest(
 
     @Autowired
-    private lateinit var mockMvc: MockMvc
+    private val mockMvc: MockMvc,
+
+    @Autowired
+    private val objectMapper: ObjectMapper
+
+) {
 
     @MockkBean
     private lateinit var getAccountBalanceInputPort: GetAccountBalanceInputPort
 
     @MockkBean
     private lateinit var getAccountStatementInputPort: GetAccountStatementInputPort
+
+    @MockkBean
+    private lateinit var createAccountInputPort: CreateAccountInputPort
+
 
     @Test
     fun `should return account balance`() {
@@ -99,5 +116,30 @@ class AccountControllerWebMvcTest {
                 TestFixtures.FROM_ACCOUNT_ID
             )
         }
+    }
+
+    @Test
+    fun `should create account`() {
+        val slot = slot<CreateAccountCommand>()
+        val request = CreateAccountRequest("Thiago")
+
+        every {
+            createAccountInputPort.execute(capture(slot))
+        } returns CreateAccountResult(TestFixtures.FROM_ACCOUNT_ID)
+
+        mockMvc.perform(
+            post("/accounts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        )
+            .andExpect(status().isCreated)
+            .andExpect(jsonPath("$.accountId").value(TestFixtures.FROM_ACCOUNT_ID.toString()))
+
+
+        verify(exactly = 1) {
+            createAccountInputPort.execute(any())
+        }
+
+        assertEquals("Thiago", slot.captured.ownerName)
     }
 }

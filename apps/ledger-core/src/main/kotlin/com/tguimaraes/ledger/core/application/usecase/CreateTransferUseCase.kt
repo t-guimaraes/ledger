@@ -5,27 +5,23 @@ import com.tguimaraes.ledger.core.application.port.input.CreateTransferInputPort
 import com.tguimaraes.ledger.core.application.port.output.repository.AccountRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.query.EntryQueryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.EntryRepositoryPort
-import com.tguimaraes.ledger.core.application.port.output.cache.IdempotencyCachePort
+import com.tguimaraes.ledger.core.application.port.output.idempotency.IdempotencyPort
 import com.tguimaraes.ledger.core.application.port.output.repository.TransactionRepositoryPort
 import com.tguimaraes.ledger.core.domain.dto.TransferResult
 import com.tguimaraes.ledger.core.domain.exception.AccountNotFoundException
 import com.tguimaraes.ledger.core.domain.exception.IdempotencyException
 import com.tguimaraes.ledger.core.domain.service.TransferDomainService
-import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
-@Service
 class CreateTransferUseCase(
     private val accountRepositoryPort: AccountRepositoryPort,
     private val transactionRepositoryPort: TransactionRepositoryPort,
     private val entryRepositoryPort: EntryRepositoryPort,
     private val entryQueryPort: EntryQueryPort,
-    private val idempotencyCachePort: IdempotencyCachePort,
+    private val idempotencyPort: IdempotencyPort,
     private val transferDomainService: TransferDomainService
 ) : CreateTransferInputPort {
 
-    @Transactional
     override fun transfer(command: CreateTransferCommand, idempotencyKey: String) {
 
         validateIdempotency(idempotencyKey)
@@ -48,7 +44,7 @@ class CreateTransferUseCase(
     }
 
     private fun validateIdempotency(idempotencyKey: String) {
-        if (idempotencyCachePort.exists(idempotencyKey)) {
+        if (idempotencyPort.exists(idempotencyKey)) {
             throw IdempotencyException(
                 "Request already processed"
             )
@@ -69,7 +65,7 @@ class CreateTransferUseCase(
             transferResult.entries
         )
 
-        idempotencyCachePort.save(
+        idempotencyPort.save(
             idempotencyKey
         )
     }

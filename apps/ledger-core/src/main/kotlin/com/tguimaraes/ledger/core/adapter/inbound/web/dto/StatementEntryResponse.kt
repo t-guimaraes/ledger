@@ -9,10 +9,11 @@ import java.util.UUID
 data class StatementEntryResponse(
 
     val transactionId: UUID,
+
     val type: EntryType,
-    @field:Schema(
-        example = "100.00"
-    )
+
+    @field:Schema(example = "100.00")
     val amount: BigDecimal,
+
     val createdAt: Instant
 )
