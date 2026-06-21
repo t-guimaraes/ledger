@@ -3,6 +3,7 @@ package com.tguimaraes.ledger.core.adapter.inbound.web.exception
 import com.tguimaraes.ledger.core.domain.exception.AccountNotFoundException
 import com.tguimaraes.ledger.core.domain.exception.IdempotencyException
 import com.tguimaraes.ledger.core.domain.exception.InsufficientBalanceException
+import com.tguimaraes.ledger.core.domain.exception.InvalidAccountOwnerNameException
 import com.tguimaraes.ledger.core.domain.exception.InvalidTransferAmountException
 import com.tguimaraes.ledger.core.domain.exception.SameAccountTransferException
 import com.tguimaraes.ledger.core.support.TestFixtures
@@ -79,6 +80,18 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.CONFLICT.value(), result.statusCode.value())
         assertEquals("IDEMPOTENCY_CONFLICT", result.body?.code)
         assertEquals("Request already processed", result.body?.message)
+    }
+
+    @Test
+    fun `should return bad request for owner name account exception`() {
+
+        val result = handler.handleInvalidAccount(
+            InvalidAccountOwnerNameException()
+        )
+
+        assertEquals(HttpStatus.BAD_REQUEST.value(), result.statusCode.value())
+        assertEquals("INVALID_ACCOUNT_OWNER_NAME", result.body?.code)
+        assertEquals("Account owner name must not be blank", result.body?.message)
     }
 
     @Test

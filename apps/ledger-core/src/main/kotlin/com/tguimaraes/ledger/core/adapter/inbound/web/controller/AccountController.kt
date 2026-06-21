@@ -3,8 +3,8 @@ package com.tguimaraes.ledger.core.adapter.inbound.web.controller
 import com.tguimaraes.ledger.core.adapter.inbound.web.doc.AccountApi
 import com.tguimaraes.ledger.core.adapter.inbound.web.dto.AccountStatementResponse
 import com.tguimaraes.ledger.core.adapter.inbound.web.dto.AccountBalanceResponse
-import com.tguimaraes.ledger.core.adapter.inbound.web.dto.AccountDepositRequest
-import com.tguimaraes.ledger.core.adapter.inbound.web.dto.AccountDepositResponse
+import com.tguimaraes.ledger.core.adapter.inbound.web.dto.CreateAccountDepositRequest
+import com.tguimaraes.ledger.core.adapter.inbound.web.dto.CreateAccountDepositResponse
 import com.tguimaraes.ledger.core.adapter.inbound.web.dto.CreateAccountRequest
 import com.tguimaraes.ledger.core.adapter.inbound.web.dto.CreateAccountResponse
 import com.tguimaraes.ledger.core.adapter.inbound.web.mapper.AccountMapper
@@ -57,8 +57,8 @@ class AccountController(
     override fun deposit(
         @PathVariable accountId: UUID,
         @RequestHeader("Idempotency-Key") idempotencyKey: String,
-        @Valid @RequestBody request: AccountDepositRequest
-    ): ResponseEntity<AccountDepositResponse> {
+        @Valid @RequestBody request: CreateAccountDepositRequest
+    ): ResponseEntity<CreateAccountDepositResponse> {
 
         val result = createAccountDepositInputPort.deposit(
             CreateAccountDepositMapper.toCommand(request),

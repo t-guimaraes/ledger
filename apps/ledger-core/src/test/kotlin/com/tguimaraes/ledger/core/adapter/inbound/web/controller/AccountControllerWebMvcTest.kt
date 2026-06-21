@@ -2,9 +2,13 @@ package com.tguimaraes.ledger.core.adapter.inbound.web.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
+import com.tguimaraes.ledger.core.adapter.inbound.web.dto.CreateAccountDepositRequest
+import com.tguimaraes.ledger.core.adapter.inbound.web.dto.CreateAccountDepositResponse
 import com.tguimaraes.ledger.core.adapter.inbound.web.dto.CreateAccountRequest
 import com.tguimaraes.ledger.core.application.dto.AccountStatementResult
 import com.tguimaraes.ledger.core.application.dto.CreateAccountCommand
+import com.tguimaraes.ledger.core.application.dto.CreateAccountDepositCommand
+import com.tguimaraes.ledger.core.application.dto.CreateAccountDepositResult
 import com.tguimaraes.ledger.core.application.dto.CreateAccountResult
 import com.tguimaraes.ledger.core.application.port.input.CreateAccountDepositInputPort
 import com.tguimaraes.ledger.core.application.port.input.CreateAccountInputPort
@@ -12,6 +16,8 @@ import com.tguimaraes.ledger.core.application.port.input.GetAccountBalanceInputP
 import com.tguimaraes.ledger.core.application.port.input.GetAccountStatementInputPort
 import com.tguimaraes.ledger.core.support.TestFixtures
 import io.mockk.every
+import io.mockk.just
+import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -50,7 +56,63 @@ class AccountControllerWebMvcTest(
     private lateinit var getAccountStatementInputPort: GetAccountStatementInputPort
 
 
+    @Test
+    fun `should deposit an account`() {
+        val amount = BigDecimal("1500.00")
+        val request = CreateAccountDepositRequest(amount)
+        val response = CreateAccountDepositResult(TestFixtures.FROM_ACCOUNT_ID, amount)
 
+        every {
+            createAccountDepositInputPort.deposit(
+                CreateAccountDepositCommand(amount),
+                TestFixtures.FROM_ACCOUNT_ID,
+                TestFixtures.IDEMPOTENCY_KEY
+            )
+        } returns response
+
+        mockMvc.perform(
+            post("/accounts/${TestFixtures.FROM_ACCOUNT_ID}/deposit")
+                .header(
+                    "Idempotency-Key",
+                    TestFixtures.IDEMPOTENCY_KEY
+                )
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        )
+            .andExpect(status().isCreated)
+            .andExpect(jsonPath("$.accountId").value(TestFixtures.FROM_ACCOUNT_ID.toString()))
+            .andExpect(jsonPath("$.amount").value(amount.toDouble()))
+
+
+        verify(exactly = 1) {
+            createAccountDepositInputPort.deposit(any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `should create account`() {
+        val slot = slot<CreateAccountCommand>()
+        val request = CreateAccountRequest("Thiago")
+
+        every {
+            createAccountInputPort.execute(capture(slot))
+        } returns CreateAccountResult(TestFixtures.FROM_ACCOUNT_ID)
+
+        mockMvc.perform(
+            post("/accounts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        )
+            .andExpect(status().isCreated)
+            .andExpect(jsonPath("$.accountId").value(TestFixtures.FROM_ACCOUNT_ID.toString()))
+
+
+        verify(exactly = 1) {
+            createAccountInputPort.execute(any())
+        }
+
+        assertEquals("Thiago", slot.captured.ownerName)
+    }
 
     @Test
     fun `should return account balance`() {
@@ -121,30 +183,5 @@ class AccountControllerWebMvcTest(
                 TestFixtures.FROM_ACCOUNT_ID
             )
         }
-    }
-
-    @Test
-    fun `should create account`() {
-        val slot = slot<CreateAccountCommand>()
-        val request = CreateAccountRequest("Thiago")
-
-        every {
-            createAccountInputPort.execute(capture(slot))
-        } returns CreateAccountResult(TestFixtures.FROM_ACCOUNT_ID)
-
-        mockMvc.perform(
-            post("/accounts")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-        )
-            .andExpect(status().isCreated)
-            .andExpect(jsonPath("$.accountId").value(TestFixtures.FROM_ACCOUNT_ID.toString()))
-
-
-        verify(exactly = 1) {
-            createAccountInputPort.execute(any())
-        }
-
-        assertEquals("Thiago", slot.captured.ownerName)
     }
 }

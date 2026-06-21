@@ -2,8 +2,8 @@ package com.tguimaraes.ledger.core.adapter.inbound.web.doc
 
 import com.tguimaraes.ledger.core.adapter.inbound.web.dto.AccountStatementResponse
 import com.tguimaraes.ledger.core.adapter.inbound.web.dto.AccountBalanceResponse
-import com.tguimaraes.ledger.core.adapter.inbound.web.dto.AccountDepositRequest
-import com.tguimaraes.ledger.core.adapter.inbound.web.dto.AccountDepositResponse
+import com.tguimaraes.ledger.core.adapter.inbound.web.dto.CreateAccountDepositRequest
+import com.tguimaraes.ledger.core.adapter.inbound.web.dto.CreateAccountDepositResponse
 import com.tguimaraes.ledger.core.adapter.inbound.web.dto.CreateAccountRequest
 import com.tguimaraes.ledger.core.adapter.inbound.web.dto.CreateAccountResponse
 import io.swagger.v3.oas.annotations.Operation
@@ -48,8 +48,8 @@ interface AccountApi {
             required = true,
             description = "Account deposit payload"
         )
-        request: AccountDepositRequest,
-    ): ResponseEntity<AccountDepositResponse>
+        request: CreateAccountDepositRequest,
+    ): ResponseEntity<CreateAccountDepositResponse>
 
     @Operation(
         summary = "Get account balance",

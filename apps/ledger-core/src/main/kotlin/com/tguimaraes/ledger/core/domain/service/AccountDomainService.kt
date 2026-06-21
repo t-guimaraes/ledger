@@ -18,14 +18,12 @@ class AccountDomainService {
         validateAmount(amount)
 
         val transaction = Transaction(
-            //TODO: colocar service
             id = UUID.randomUUID(),
             amount = amount,
             createdAt = Instant.now()
         )
 
         val entry = Entry(
-            //TODO: colocar service
             id = UUID.randomUUID(),
             transactionId = transaction.id,
             accountId = accountId,

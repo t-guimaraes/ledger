@@ -199,12 +199,15 @@ class CreateTransferUseCaseTest {
                 any()
             )
         } returns transferResult
+
         every {
             transactionRepositoryPort.save(transaction)
         } just runs
+
         every {
             entryRepositoryPort.saveAll(entries)
         } just runs
+
         every {
             idempotencyPort.save(TestFixtures.IDEMPOTENCY_KEY)
         } just runs
