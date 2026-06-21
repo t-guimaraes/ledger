@@ -1,11 +1,6 @@
 package com.tguimaraes.ledger.core.adapter.inbound.web.exception
 
-import com.tguimaraes.ledger.core.domain.exception.AccountNotFoundException
-import com.tguimaraes.ledger.core.domain.exception.IdempotencyException
-import com.tguimaraes.ledger.core.domain.exception.InsufficientBalanceException
-import com.tguimaraes.ledger.core.domain.exception.InvalidAccountOwnerNameException
-import com.tguimaraes.ledger.core.domain.exception.InvalidTransferAmountException
-import com.tguimaraes.ledger.core.domain.exception.SameAccountTransferException
+import com.tguimaraes.ledger.core.domain.exception.*
 import com.tguimaraes.ledger.core.support.TestFixtures
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -74,7 +69,7 @@ class GlobalExceptionHandlerTest {
     fun `should return conflict for idempotency exception`() {
 
         val result = handler.handleConflict(
-            IdempotencyException("Request already processed")
+            IdempotencyException()
         )
 
         assertEquals(HttpStatus.CONFLICT.value(), result.statusCode.value())

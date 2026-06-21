@@ -10,7 +10,7 @@ import com.tguimaraes.ledger.core.domain.model.EntryType
 import com.tguimaraes.ledger.core.domain.model.Transaction
 import java.math.BigDecimal
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 class TransferDomainService {
     fun createTransfer(

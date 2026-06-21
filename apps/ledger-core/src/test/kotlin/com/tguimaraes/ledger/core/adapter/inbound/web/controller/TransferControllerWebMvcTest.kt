@@ -3,7 +3,7 @@ package com.tguimaraes.ledger.core.adapter.inbound.web.controller
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import com.tguimaraes.ledger.core.adapter.inbound.web.exception.GlobalExceptionHandler
-import com.tguimaraes.ledger.core.application.port.input.CreateTransferInputPort
+import com.tguimaraes.ledger.core.application.port.input.TransferInputPort
 import com.tguimaraes.ledger.core.support.TestFixtures
 import io.mockk.every
 import io.mockk.just
@@ -32,15 +32,14 @@ class TransferControllerWebMvcTest(
     private val objectMapper: ObjectMapper
 
 ) {
-
     @MockkBean
-    private lateinit var createTransferInputPort: CreateTransferInputPort
+    private lateinit var transferInputPort: TransferInputPort
 
     @Test
     fun `should return bad request when amount is below minimum`() {
 
         val request = TestFixtures.createTransferRequest(
-            amount = BigDecimal("0.001")
+            amount = BigDecimal.ZERO
         )
 
         mockMvc.perform(
@@ -57,7 +56,7 @@ class TransferControllerWebMvcTest(
             .andExpect(status().isBadRequest)
 
         verify(exactly = 0) {
-            createTransferInputPort.transfer(any(), any())
+            transferInputPort.transfer(any(), any())
         }
     }
 
@@ -76,17 +75,17 @@ class TransferControllerWebMvcTest(
             .andExpect(status().isBadRequest)
 
         verify(exactly = 0) {
-            createTransferInputPort.transfer(any(), any())
+            transferInputPort.transfer(any(), any())
         }
     }
 
     @Test
-    fun `should call input port when request is valid`() {
+    fun `should call input port when request is valid and transfer succeeds`() {
 
         val request = TestFixtures.createTransferRequest()
 
         every {
-            createTransferInputPort.transfer(
+            transferInputPort.transfer(
                 TestFixtures.createTransferCommand(),
                 TestFixtures.IDEMPOTENCY_KEY
             )
@@ -106,7 +105,7 @@ class TransferControllerWebMvcTest(
             .andExpect(status().isCreated)
 
         verify(exactly = 1) {
-            createTransferInputPort.transfer(
+            transferInputPort.transfer(
                 TestFixtures.createTransferCommand(),
                 TestFixtures.IDEMPOTENCY_KEY
             )

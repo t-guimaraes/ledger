@@ -6,13 +6,11 @@ import com.tguimaraes.ledger.core.application.port.output.idempotency.Idempotenc
 import com.tguimaraes.ledger.core.domain.exception.IdempotencyException
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Component
-import java.time.Clock
 import java.time.Instant
 
 @Component
 class IdempotencyPersistenceAdapter(
-    private val repository: IdempotencyKeyJpaRepository,
-    private val clock: Clock
+    private val repository: IdempotencyKeyJpaRepository
 ) : IdempotencyPort {
 
     override fun exists(key: String): Boolean =
@@ -23,11 +21,11 @@ class IdempotencyPersistenceAdapter(
             repository.save(
                 IdempotencyKeyJpaEntity(
                     key = key,
-                    createdAt = Instant.now(clock)
+                    createdAt = Instant.now()
                 )
             )
         } catch (ex: DataIntegrityViolationException) {
-            throw IdempotencyException("Request already processed")
+            throw IdempotencyException()
         }
     }
 }

@@ -5,7 +5,7 @@ import com.tguimaraes.ledger.core.adapter.outbound.persistence.repository.Accoun
 import com.tguimaraes.ledger.core.application.port.output.repository.AccountRepositoryPort
 import com.tguimaraes.ledger.core.domain.model.Account
 import org.springframework.stereotype.Component
-import java.util.UUID
+import java.util.*
 
 @Component
 class AccountPersistenceAdapter(

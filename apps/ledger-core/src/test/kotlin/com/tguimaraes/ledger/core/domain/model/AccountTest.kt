@@ -2,9 +2,7 @@ package com.tguimaraes.ledger.core.domain.model
 
 import com.tguimaraes.ledger.core.domain.exception.InvalidAccountOwnerNameException
 import com.tguimaraes.ledger.core.support.TestFixtures
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class AccountTest {

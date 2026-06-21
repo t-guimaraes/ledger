@@ -9,7 +9,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import java.math.BigDecimal
-import java.util.UUID
+import java.util.*
 
 @AutoConfigureMockMvc
 class AccountControllerIntegrationTest : AbstractIntegrationTest() {

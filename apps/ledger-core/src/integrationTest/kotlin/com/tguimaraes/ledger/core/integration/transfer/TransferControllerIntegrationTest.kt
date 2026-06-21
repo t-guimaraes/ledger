@@ -1,7 +1,7 @@
 package com.tguimaraes.ledger.core.integration.transfer
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.tguimaraes.ledger.core.adapter.inbound.web.dto.CreateTransferRequest
+import com.tguimaraes.ledger.core.adapter.inbound.web.dto.transfer.TransferRequest
 import com.tguimaraes.ledger.core.domain.model.EntryType
 import com.tguimaraes.ledger.core.integration.support.AbstractIntegrationTest
 import org.junit.jupiter.api.BeforeEach
@@ -13,7 +13,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.math.BigDecimal
-import java.util.UUID
+import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -54,7 +54,7 @@ class TransferControllerIntegrationTest : AbstractIntegrationTest() {
     fun `should create transfer successfully`() {
 
         val request =
-            CreateTransferRequest(
+            TransferRequest(
                 fromAccountId = fromAccountId,
                 toAccountId = toAccountId,
                 amount = BigDecimal("200.00")
@@ -116,7 +116,7 @@ class TransferControllerIntegrationTest : AbstractIntegrationTest() {
         createIdempotencyKey("duplicate-key")
 
         val request =
-            CreateTransferRequest(
+            TransferRequest(
                 fromAccountId = fromAccountId,
                 toAccountId = toAccountId,
                 amount = BigDecimal("100.00")
@@ -150,7 +150,7 @@ class TransferControllerIntegrationTest : AbstractIntegrationTest() {
     fun `should return unprocessable entity when balance is insufficient`() {
 
         val request =
-            CreateTransferRequest(
+            TransferRequest(
                 fromAccountId = fromAccountId,
                 toAccountId = toAccountId,
                 amount = BigDecimal("2000.00")
@@ -186,7 +186,7 @@ class TransferControllerIntegrationTest : AbstractIntegrationTest() {
     fun `should return not found when source account does not exist`() {
 
         val request =
-            CreateTransferRequest(
+            TransferRequest(
                 fromAccountId = UUID.randomUUID(),
                 toAccountId = toAccountId,
                 amount = BigDecimal("100.00")
@@ -210,7 +210,7 @@ class TransferControllerIntegrationTest : AbstractIntegrationTest() {
     fun `should return bad request when amount is invalid`() {
 
         val request =
-            CreateTransferRequest(
+            TransferRequest(
                 fromAccountId = fromAccountId,
                 toAccountId = toAccountId,
                 amount = BigDecimal("0.001")

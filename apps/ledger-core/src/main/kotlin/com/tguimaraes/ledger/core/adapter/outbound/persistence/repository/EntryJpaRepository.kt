@@ -4,7 +4,7 @@ import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.EntryJpaEn
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import java.math.BigDecimal
-import java.util.UUID
+import java.util.*
 
 interface EntryJpaRepository :
     JpaRepository<EntryJpaEntity, UUID> {

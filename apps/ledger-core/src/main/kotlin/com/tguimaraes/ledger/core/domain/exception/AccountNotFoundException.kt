@@ -1,6 +1,6 @@
 package com.tguimaraes.ledger.core.domain.exception
 
-import java.util.UUID
+import java.util.*
 
 class AccountNotFoundException(
     accountId: UUID

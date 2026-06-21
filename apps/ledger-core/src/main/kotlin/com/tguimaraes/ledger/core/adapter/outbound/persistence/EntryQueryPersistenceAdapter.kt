@@ -1,11 +1,11 @@
 package com.tguimaraes.ledger.core.adapter.outbound.persistence
 
-import com.tguimaraes.ledger.core.application.port.output.query.EntryQueryPort
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.repository.EntryJpaRepository
-import com.tguimaraes.ledger.core.application.dto.AccountStatementEntryResult
+import com.tguimaraes.ledger.core.application.dto.account.AccountStatementEntryResult
+import com.tguimaraes.ledger.core.application.port.output.query.EntryQueryPort
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
-import java.util.UUID
+import java.util.*
 
 @Component
 class EntryQueryPersistenceAdapter(

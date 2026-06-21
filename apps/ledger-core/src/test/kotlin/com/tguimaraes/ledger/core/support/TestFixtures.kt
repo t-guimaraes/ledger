@@ -1,19 +1,19 @@
 package com.tguimaraes.ledger.core.support
 
-import com.tguimaraes.ledger.core.adapter.inbound.web.dto.CreateTransferRequest
+import com.tguimaraes.ledger.core.adapter.inbound.web.dto.transfer.TransferRequest
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.AccountJpaEntity
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.EntryJpaEntity
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.TransactionJpaEntity
-import com.tguimaraes.ledger.core.application.dto.AccountBalanceResult
-import com.tguimaraes.ledger.core.application.dto.CreateTransferCommand
-import com.tguimaraes.ledger.core.application.dto.AccountStatementEntryResult
+import com.tguimaraes.ledger.core.application.dto.account.AccountBalanceResult
+import com.tguimaraes.ledger.core.application.dto.account.AccountStatementEntryResult
+import com.tguimaraes.ledger.core.application.dto.transfer.TransferCommand
 import com.tguimaraes.ledger.core.domain.model.Account
 import com.tguimaraes.ledger.core.domain.model.Entry
 import com.tguimaraes.ledger.core.domain.model.EntryType
 import com.tguimaraes.ledger.core.domain.model.Transaction
 import java.math.BigDecimal
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 object TestFixtures {
 
@@ -36,7 +36,7 @@ object TestFixtures {
 
     fun createTransferRequest(
         amount: BigDecimal = BigDecimal("100.00")
-    ) = CreateTransferRequest(
+    ) = TransferRequest(
         fromAccountId = FROM_ACCOUNT_ID,
         toAccountId = TO_ACCOUNT_ID,
         amount = amount
@@ -44,7 +44,7 @@ object TestFixtures {
 
     fun createTransferCommand(
         amount: BigDecimal = BigDecimal("100.00")
-    ) = CreateTransferCommand(
+    ) = TransferCommand(
         fromAccountId = FROM_ACCOUNT_ID,
         toAccountId = TO_ACCOUNT_ID,
         amount = amount
