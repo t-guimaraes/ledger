@@ -6,6 +6,7 @@ import com.tguimaraes.ledger.core.adapter.inbound.web.dto.CreateAccountRequest
 import com.tguimaraes.ledger.core.application.dto.AccountStatementResult
 import com.tguimaraes.ledger.core.application.dto.CreateAccountCommand
 import com.tguimaraes.ledger.core.application.dto.CreateAccountResult
+import com.tguimaraes.ledger.core.application.port.input.CreateAccountDepositInputPort
 import com.tguimaraes.ledger.core.application.port.input.CreateAccountInputPort
 import com.tguimaraes.ledger.core.application.port.input.GetAccountBalanceInputPort
 import com.tguimaraes.ledger.core.application.port.input.GetAccountStatementInputPort
@@ -36,6 +37,11 @@ class AccountControllerWebMvcTest(
     private val objectMapper: ObjectMapper
 
 ) {
+    @MockkBean
+    private lateinit var createAccountInputPort: CreateAccountInputPort
+
+    @MockkBean
+    private lateinit var createAccountDepositInputPort: CreateAccountDepositInputPort
 
     @MockkBean
     private lateinit var getAccountBalanceInputPort: GetAccountBalanceInputPort
@@ -43,8 +49,7 @@ class AccountControllerWebMvcTest(
     @MockkBean
     private lateinit var getAccountStatementInputPort: GetAccountStatementInputPort
 
-    @MockkBean
-    private lateinit var createAccountInputPort: CreateAccountInputPort
+
 
 
     @Test

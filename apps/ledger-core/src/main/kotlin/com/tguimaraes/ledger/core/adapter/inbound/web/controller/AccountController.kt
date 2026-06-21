@@ -9,7 +9,7 @@ import com.tguimaraes.ledger.core.adapter.inbound.web.dto.CreateAccountRequest
 import com.tguimaraes.ledger.core.adapter.inbound.web.dto.CreateAccountResponse
 import com.tguimaraes.ledger.core.adapter.inbound.web.mapper.AccountMapper
 import com.tguimaraes.ledger.core.adapter.inbound.web.mapper.AccountBalanceMapper
-import com.tguimaraes.ledger.core.adapter.inbound.web.mapper.AccountDepositMapper
+import com.tguimaraes.ledger.core.adapter.inbound.web.mapper.CreateAccountDepositMapper
 import com.tguimaraes.ledger.core.adapter.inbound.web.mapper.AccountStatementMapper
 import com.tguimaraes.ledger.core.application.port.input.CreateAccountDepositInputPort
 import com.tguimaraes.ledger.core.application.port.input.CreateAccountInputPort
@@ -61,7 +61,7 @@ class AccountController(
     ): ResponseEntity<AccountDepositResponse> {
 
         val result = createAccountDepositInputPort.deposit(
-            AccountDepositMapper.toCommand(request),
+            CreateAccountDepositMapper.toCommand(request),
             accountId,
             idempotencyKey
         )
@@ -69,7 +69,7 @@ class AccountController(
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .body(
-                AccountDepositMapper.toResponse(result)
+                CreateAccountDepositMapper.toResponse(result)
             )
     }
 

@@ -34,10 +34,11 @@ class UseCaseConfig {
     fun createAccountUseCase(
         accountRepository: AccountRepositoryPort,
         idGenerator: IdGeneratorPort,
+        clock: Clock,
         transactionManager: PlatformTransactionManager
     ): CreateAccountInputPort {
         return TransactionalCreateAccountAdapter(
-            CreateAccountUseCase(accountRepository, idGenerator),
+            CreateAccountUseCase(accountRepository, idGenerator, clock),
             TransactionTemplate(transactionManager)
         )
     }
@@ -94,4 +95,8 @@ class UseCaseConfig {
             TransactionTemplate(transactionManager)
         )
     }
+
+    @Bean
+    fun clock(): Clock =
+        Clock.systemUTC()
 }
