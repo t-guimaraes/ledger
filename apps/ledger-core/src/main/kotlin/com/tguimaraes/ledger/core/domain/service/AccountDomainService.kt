@@ -1,7 +1,9 @@
 package com.tguimaraes.ledger.core.domain.service
 
 import com.tguimaraes.ledger.core.domain.dto.DepositResult
+import com.tguimaraes.ledger.core.domain.dto.WithdrawResult
 import com.tguimaraes.ledger.core.domain.exception.InvalidAccountDepositAmountException
+import com.tguimaraes.ledger.core.domain.exception.InvalidAccountWithdrawAmountException
 import com.tguimaraes.ledger.core.domain.model.Entry
 import com.tguimaraes.ledger.core.domain.model.EntryType
 import com.tguimaraes.ledger.core.domain.model.Transaction
@@ -10,27 +12,11 @@ import java.time.Instant
 import java.util.*
 
 class AccountDomainService {
-    fun createDeposit(
-        accountId: UUID,
-        amount: BigDecimal,
-    ): DepositResult {
+    fun deposit( accountId: UUID,amount: BigDecimal): DepositResult {
+        validateAmount(amount, EntryType.CREDIT)
 
-        validateAmount(amount)
-
-        val transaction = Transaction(
-            id = UUID.randomUUID(),
-            amount = amount,
-            createdAt = Instant.now()
-        )
-
-        val entry = Entry(
-            id = UUID.randomUUID(),
-            transactionId = transaction.id,
-            accountId = accountId,
-            type = EntryType.CREDIT,
-            amount = amount,
-            createdAt = Instant.now()
-        )
+        val transaction = createTransaction(amount)
+        val entry = createEntry(transaction, accountId, amount, EntryType.CREDIT)
 
         return DepositResult(
             transaction = transaction,
@@ -38,11 +24,47 @@ class AccountDomainService {
         )
     }
 
+    fun withdraw(accountId: UUID, amount: BigDecimal): WithdrawResult {
+        validateAmount(amount, EntryType.DEBIT)
+
+        val transaction = createTransaction(amount)
+        val entry = createEntry(transaction, accountId, amount, EntryType.DEBIT)
+
+        return WithdrawResult(
+            transaction = transaction,
+            entries = listOf(entry)
+        )
+    }
+
     private fun validateAmount(
-        amount: BigDecimal
+        amount: BigDecimal,
+        type: EntryType
     ) {
         if (amount <= BigDecimal.ZERO) {
-            throw InvalidAccountDepositAmountException()
+            if(type == EntryType.DEBIT) {
+                throw InvalidAccountWithdrawAmountException()
+            } else {
+                throw InvalidAccountDepositAmountException()
+            }
         }
+    }
+
+    private fun createTransaction(amount: BigDecimal): Transaction {
+        return Transaction(
+            id = UUID.randomUUID(),
+            amount = amount,
+            createdAt = Instant.now()
+        )
+    }
+
+    private fun createEntry(transaction: Transaction, accountId: UUID, amount: BigDecimal, entryType: EntryType): Entry {
+        return Entry(
+            id = UUID.randomUUID(),
+            transactionId = transaction.id,
+            accountId = accountId,
+            type = entryType,
+            amount = amount,
+            createdAt = Instant.now()
+        )
     }
 }

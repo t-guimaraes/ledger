@@ -3,12 +3,10 @@ package com.tguimaraes.ledger.core.adapter.inbound.web.controller
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import com.tguimaraes.ledger.core.adapter.inbound.web.dto.account.AccountDepositRequest
+import com.tguimaraes.ledger.core.adapter.inbound.web.dto.account.AccountWithdrawRequest
 import com.tguimaraes.ledger.core.adapter.inbound.web.dto.account.CreateAccountRequest
 import com.tguimaraes.ledger.core.application.dto.account.*
-import com.tguimaraes.ledger.core.application.port.input.AccountBalanceInputPort
-import com.tguimaraes.ledger.core.application.port.input.AccountDepositInputPort
-import com.tguimaraes.ledger.core.application.port.input.AccountStatementInputPort
-import com.tguimaraes.ledger.core.application.port.input.CreateAccountInputPort
+import com.tguimaraes.ledger.core.application.port.input.*
 import com.tguimaraes.ledger.core.support.TestFixtures
 import io.mockk.every
 import io.mockk.slot
@@ -44,44 +42,14 @@ class AccountControllerWebMvcTest(
     private lateinit var accountDepositInputPort: AccountDepositInputPort
 
     @MockkBean
+    private lateinit var accountWithdrawInputPort: AccountWithdrawInputPort
+
+    @MockkBean
     private lateinit var accountBalanceInputPort: AccountBalanceInputPort
 
     @MockkBean
     private lateinit var accountStatementInputPort: AccountStatementInputPort
 
-
-    @Test
-    fun `should deposit an account`() {
-        val amount = BigDecimal("1500.00")
-        val request = AccountDepositRequest(amount)
-        val response = AccountDepositResult(TestFixtures.FROM_ACCOUNT_ID, amount)
-
-        every {
-            accountDepositInputPort.deposit(
-                AccountDepositCommand(amount),
-                TestFixtures.FROM_ACCOUNT_ID,
-                TestFixtures.IDEMPOTENCY_KEY
-            )
-        } returns response
-
-        mockMvc.perform(
-            post("/accounts/${TestFixtures.FROM_ACCOUNT_ID}/deposit")
-                .header(
-                    "Idempotency-Key",
-                    TestFixtures.IDEMPOTENCY_KEY
-                )
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-        )
-            .andExpect(status().isCreated)
-            .andExpect(jsonPath("$.accountId").value(TestFixtures.FROM_ACCOUNT_ID.toString()))
-            .andExpect(jsonPath("$.amount").value(amount.toDouble()))
-
-
-        verify(exactly = 1) {
-            accountDepositInputPort.deposit(any(), any(), any())
-        }
-    }
 
     @Test
     fun `should create account`() {
@@ -106,6 +74,72 @@ class AccountControllerWebMvcTest(
         }
 
         assertEquals("Thiago", slot.captured.ownerName)
+    }
+
+    @Test
+    fun `should deposit an account`() {
+        val amount = BigDecimal("1500.00")
+        val request = AccountDepositRequest(amount)
+        val result = AccountDepositResult(TestFixtures.FROM_ACCOUNT_ID, amount)
+
+        every {
+            accountDepositInputPort.deposit(
+                AccountDepositCommand(amount),
+                TestFixtures.FROM_ACCOUNT_ID,
+                TestFixtures.IDEMPOTENCY_KEY
+            )
+        } returns result
+
+        mockMvc.perform(
+            post("/accounts/${TestFixtures.FROM_ACCOUNT_ID}/deposit")
+                .header(
+                    "Idempotency-Key",
+                    TestFixtures.IDEMPOTENCY_KEY
+                )
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        )
+            .andExpect(status().isCreated)
+            .andExpect(jsonPath("$.accountId").value(TestFixtures.FROM_ACCOUNT_ID.toString()))
+            .andExpect(jsonPath("$.amount").value(amount.toDouble()))
+
+
+        verify(exactly = 1) {
+            accountDepositInputPort.deposit(any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `should withdraw an account`() {
+        val amount = BigDecimal("1500.00")
+        val request = AccountWithdrawRequest(amount)
+        val result = AccountWithdrawResult(TestFixtures.FROM_ACCOUNT_ID, amount)
+
+        every {
+            accountWithdrawInputPort.withdraw(
+                AccountWithdrawCommand(amount),
+                TestFixtures.FROM_ACCOUNT_ID,
+                TestFixtures.IDEMPOTENCY_KEY
+            )
+        } returns result
+
+        mockMvc.perform(
+            post("/accounts/${TestFixtures.FROM_ACCOUNT_ID}/withdraw")
+                .header(
+                    "Idempotency-Key",
+                    TestFixtures.IDEMPOTENCY_KEY
+                )
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        )
+            .andExpect(status().isCreated)
+            .andExpect(jsonPath("$.accountId").value(TestFixtures.FROM_ACCOUNT_ID.toString()))
+            .andExpect(jsonPath("$.amount").value(amount.toDouble()))
+
+
+        verify(exactly = 1) {
+            accountWithdrawInputPort.withdraw(any(), any(), any())
+        }
     }
 
     @Test

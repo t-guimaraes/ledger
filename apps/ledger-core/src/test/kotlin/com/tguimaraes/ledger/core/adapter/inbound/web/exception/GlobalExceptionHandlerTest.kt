@@ -80,7 +80,7 @@ class GlobalExceptionHandlerTest {
     @Test
     fun `should return bad request for owner name account exception`() {
 
-        val result = handler.handleInvalidAccount(
+        val result = handler.handleInvalidAccountOwnerName(
             InvalidAccountOwnerNameException()
         )
 
@@ -88,6 +88,31 @@ class GlobalExceptionHandlerTest {
         assertEquals("INVALID_ACCOUNT_OWNER_NAME", result.body?.code)
         assertEquals("Account owner name must not be blank", result.body?.message)
     }
+
+    @Test
+    fun `should return bad request for deposit account exception`() {
+
+        val result = handler.handleInvalidAccountDeposit(
+            InvalidAccountDepositAmountException()
+        )
+
+        assertEquals(HttpStatus.BAD_REQUEST.value(), result.statusCode.value())
+        assertEquals("INVALID_ACCOUNT_DEPOSIT", result.body?.code)
+        assertEquals("Deposit amount must be greater than zero", result.body?.message)
+    }
+
+    @Test
+    fun `should return bad request for withdraw account exception`() {
+
+        val result = handler.handleInvalidAccountWithdraw(
+            InvalidAccountWithdrawAmountException()
+        )
+
+        assertEquals(HttpStatus.BAD_REQUEST.value(), result.statusCode.value())
+        assertEquals("INVALID_ACCOUNT_WITHDRAW", result.body?.code)
+        assertEquals("Withdraw amount must be greater than zero", result.body?.message)
+    }
+
 
     @Test
     fun `should handle validation errors`() {

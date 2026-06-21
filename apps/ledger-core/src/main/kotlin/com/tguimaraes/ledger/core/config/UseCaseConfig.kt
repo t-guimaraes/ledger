@@ -1,6 +1,7 @@
 package com.tguimaraes.ledger.core.config
 
 import com.tguimaraes.ledger.core.adapter.outbound.transaction.TransactionalAccountDepositAdapter
+import com.tguimaraes.ledger.core.adapter.outbound.transaction.TransactionalAccountWithdrawAdapter
 import com.tguimaraes.ledger.core.adapter.outbound.transaction.TransactionalCreateAccountAdapter
 import com.tguimaraes.ledger.core.adapter.outbound.transaction.TransactionalTransferAdapter
 import com.tguimaraes.ledger.core.application.port.input.*
@@ -47,6 +48,27 @@ class UseCaseConfig {
                 entryRepositoryPort,
                 idempotencyPort,
                 accountDomainService),
+            TransactionTemplate(transactionManager)
+        )
+    }
+
+    @Bean
+    fun accountWithdraw(
+        accountRepositoryPort: AccountRepositoryPort,
+        transactionRepositoryPort: TransactionRepositoryPort,
+        entryRepositoryPort: EntryRepositoryPort,
+        idempotencyPort: IdempotencyPort,
+        accountDomainService: AccountDomainService,
+        transactionManager: PlatformTransactionManager
+    ): AccountWithdrawInputPort {
+        return TransactionalAccountWithdrawAdapter(
+            AccountWithdrawUseCase(
+                accountRepositoryPort,
+                transactionRepositoryPort,
+                entryRepositoryPort,
+                idempotencyPort,
+                accountDomainService
+            ),
             TransactionTemplate(transactionManager)
         )
     }

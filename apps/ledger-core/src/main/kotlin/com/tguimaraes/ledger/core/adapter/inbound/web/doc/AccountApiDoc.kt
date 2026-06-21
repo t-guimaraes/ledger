@@ -47,6 +47,29 @@ interface AccountApiDoc {
     ): ResponseEntity<AccountDepositResponse>
 
     @Operation(
+        summary = "Deposit an account",
+        description = "Deposit money in account."
+    )
+    fun withdraw(
+        @Parameter(
+            description = "UUID of the account",
+            example = "11111111-1111-1111-1111-111111111111"
+        )
+        accountId: UUID,
+        @Parameter(
+            description = "Unique key used to guarantee idempotent requests",
+            example = "Idempotency-Key",
+            required = true
+        )
+        idempotencyKey: String,
+        @RequestBody(
+            required = true,
+            description = "Account withdraw payload"
+        )
+        request: AccountWithdrawRequest,
+    ): ResponseEntity<AccountWithdrawResponse>
+
+    @Operation(
         summary = "Get account balance",
         description = "Returns current account balance"
     )

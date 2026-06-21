@@ -2,14 +2,8 @@ package com.tguimaraes.ledger.core.adapter.inbound.web.controller
 
 import com.tguimaraes.ledger.core.adapter.inbound.web.doc.AccountApiDoc
 import com.tguimaraes.ledger.core.adapter.inbound.web.dto.account.*
-import com.tguimaraes.ledger.core.adapter.inbound.web.mapper.account.AccountBalanceMapper
-import com.tguimaraes.ledger.core.adapter.inbound.web.mapper.account.AccountDepositMapper
-import com.tguimaraes.ledger.core.adapter.inbound.web.mapper.account.AccountMapper
-import com.tguimaraes.ledger.core.adapter.inbound.web.mapper.account.AccountStatementMapper
-import com.tguimaraes.ledger.core.application.port.input.AccountBalanceInputPort
-import com.tguimaraes.ledger.core.application.port.input.AccountDepositInputPort
-import com.tguimaraes.ledger.core.application.port.input.AccountStatementInputPort
-import com.tguimaraes.ledger.core.application.port.input.CreateAccountInputPort
+import com.tguimaraes.ledger.core.adapter.inbound.web.mapper.account.*
+import com.tguimaraes.ledger.core.application.port.input.*
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -21,6 +15,7 @@ import java.util.*
 class AccountController(
     private val createAccountInputPort: CreateAccountInputPort,
     private val accountDepositInputPort: AccountDepositInputPort,
+    private val accountWithdrawInputPort: AccountWithdrawInputPort,
     private val accountBalanceInputPort: AccountBalanceInputPort,
     private val accountStatementInputPort: AccountStatementInputPort
 ): AccountApiDoc {
@@ -53,6 +48,24 @@ class AccountController(
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .body(AccountDepositMapper.toResponse(result))
+    }
+
+    @PostMapping("/{accountId}/withdraw")
+    override fun withdraw(
+        @PathVariable accountId: UUID,
+        @RequestHeader("Idempotency-Key") idempotencyKey: String,
+        @Valid @RequestBody request: AccountWithdrawRequest
+    ): ResponseEntity<AccountWithdrawResponse> {
+
+        val result = accountWithdrawInputPort.withdraw(
+            AccountWithdrawMapper.toCommand(request),
+            accountId,
+            idempotencyKey
+        )
+
+        return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(AccountWithdrawMapper.toResponse(result))
     }
 
     @GetMapping("/{accountId}/balance")

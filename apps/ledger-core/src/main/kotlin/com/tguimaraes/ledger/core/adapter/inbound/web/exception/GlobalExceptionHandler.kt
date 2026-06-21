@@ -35,8 +35,16 @@ class GlobalExceptionHandler {
         build(HttpStatus.CONFLICT, "IDEMPOTENCY_CONFLICT", ex.message)
 
     @ExceptionHandler(InvalidAccountOwnerNameException::class)
-    fun handleInvalidAccount(ex: InvalidAccountOwnerNameException): ResponseEntity<ApiErrorResponse> =
+    fun handleInvalidAccountOwnerName(ex: InvalidAccountOwnerNameException): ResponseEntity<ApiErrorResponse> =
         build(HttpStatus.BAD_REQUEST, "INVALID_ACCOUNT_OWNER_NAME", ex.message)
+
+    @ExceptionHandler(InvalidAccountDepositAmountException::class)
+    fun handleInvalidAccountDeposit(ex: InvalidAccountDepositAmountException): ResponseEntity<ApiErrorResponse> =
+        build(HttpStatus.BAD_REQUEST, "INVALID_ACCOUNT_DEPOSIT", ex.message)
+
+    @ExceptionHandler(InvalidAccountWithdrawAmountException::class)
+    fun handleInvalidAccountWithdraw(ex: InvalidAccountWithdrawAmountException): ResponseEntity<ApiErrorResponse> =
+        build(HttpStatus.BAD_REQUEST, "INVALID_ACCOUNT_WITHDRAW", ex.message)
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleValidation(ex: MethodArgumentNotValidException): ResponseEntity<ApiErrorResponse> {
