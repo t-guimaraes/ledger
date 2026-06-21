@@ -1,7 +1,7 @@
 package com.tguimaraes.ledger.core.adapter.outbound.transaction
 
-import com.tguimaraes.ledger.core.application.dto.CreateAccountCommand
-import com.tguimaraes.ledger.core.application.dto.CreateAccountResult
+import com.tguimaraes.ledger.core.application.dto.account.CreateAccountCommand
+import com.tguimaraes.ledger.core.application.dto.account.CreateAccountResult
 import com.tguimaraes.ledger.core.application.port.input.CreateAccountInputPort
 import org.springframework.transaction.support.TransactionTemplate
 

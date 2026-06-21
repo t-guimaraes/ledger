@@ -2,22 +2,15 @@ package com.tguimaraes.ledger.core.adapter.inbound.web.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
-import com.tguimaraes.ledger.core.adapter.inbound.web.dto.CreateAccountDepositRequest
-import com.tguimaraes.ledger.core.adapter.inbound.web.dto.CreateAccountDepositResponse
-import com.tguimaraes.ledger.core.adapter.inbound.web.dto.CreateAccountRequest
-import com.tguimaraes.ledger.core.application.dto.AccountStatementResult
-import com.tguimaraes.ledger.core.application.dto.CreateAccountCommand
-import com.tguimaraes.ledger.core.application.dto.CreateAccountDepositCommand
-import com.tguimaraes.ledger.core.application.dto.CreateAccountDepositResult
-import com.tguimaraes.ledger.core.application.dto.CreateAccountResult
-import com.tguimaraes.ledger.core.application.port.input.CreateAccountDepositInputPort
+import com.tguimaraes.ledger.core.adapter.inbound.web.dto.account.AccountDepositRequest
+import com.tguimaraes.ledger.core.adapter.inbound.web.dto.account.CreateAccountRequest
+import com.tguimaraes.ledger.core.application.dto.account.*
+import com.tguimaraes.ledger.core.application.port.input.AccountBalanceInputPort
+import com.tguimaraes.ledger.core.application.port.input.AccountDepositInputPort
+import com.tguimaraes.ledger.core.application.port.input.AccountStatementInputPort
 import com.tguimaraes.ledger.core.application.port.input.CreateAccountInputPort
-import com.tguimaraes.ledger.core.application.port.input.GetAccountBalanceInputPort
-import com.tguimaraes.ledger.core.application.port.input.GetAccountStatementInputPort
 import com.tguimaraes.ledger.core.support.TestFixtures
 import io.mockk.every
-import io.mockk.just
-import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -29,7 +22,8 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.math.BigDecimal
 
 @WebMvcTest(AccountController::class)
@@ -47,24 +41,24 @@ class AccountControllerWebMvcTest(
     private lateinit var createAccountInputPort: CreateAccountInputPort
 
     @MockkBean
-    private lateinit var createAccountDepositInputPort: CreateAccountDepositInputPort
+    private lateinit var accountDepositInputPort: AccountDepositInputPort
 
     @MockkBean
-    private lateinit var getAccountBalanceInputPort: GetAccountBalanceInputPort
+    private lateinit var accountBalanceInputPort: AccountBalanceInputPort
 
     @MockkBean
-    private lateinit var getAccountStatementInputPort: GetAccountStatementInputPort
+    private lateinit var accountStatementInputPort: AccountStatementInputPort
 
 
     @Test
     fun `should deposit an account`() {
         val amount = BigDecimal("1500.00")
-        val request = CreateAccountDepositRequest(amount)
-        val response = CreateAccountDepositResult(TestFixtures.FROM_ACCOUNT_ID, amount)
+        val request = AccountDepositRequest(amount)
+        val response = AccountDepositResult(TestFixtures.FROM_ACCOUNT_ID, amount)
 
         every {
-            createAccountDepositInputPort.deposit(
-                CreateAccountDepositCommand(amount),
+            accountDepositInputPort.deposit(
+                AccountDepositCommand(amount),
                 TestFixtures.FROM_ACCOUNT_ID,
                 TestFixtures.IDEMPOTENCY_KEY
             )
@@ -85,7 +79,7 @@ class AccountControllerWebMvcTest(
 
 
         verify(exactly = 1) {
-            createAccountDepositInputPort.deposit(any(), any(), any())
+            accountDepositInputPort.deposit(any(), any(), any())
         }
     }
 
@@ -118,7 +112,7 @@ class AccountControllerWebMvcTest(
     fun `should return account balance`() {
 
         every {
-            getAccountBalanceInputPort.execute(
+            accountBalanceInputPort.execute(
                 TestFixtures.FROM_ACCOUNT_ID
             )
         } returns TestFixtures.accountBalance(BigDecimal("1500.00"))
@@ -139,7 +133,7 @@ class AccountControllerWebMvcTest(
             }
 
         verify(exactly = 1) {
-            getAccountBalanceInputPort.execute(
+            accountBalanceInputPort.execute(
                 TestFixtures.FROM_ACCOUNT_ID
             )
         }
@@ -149,7 +143,7 @@ class AccountControllerWebMvcTest(
     fun `should return statement`() {
 
         every {
-            getAccountStatementInputPort.execute(TestFixtures.FROM_ACCOUNT_ID)
+            accountStatementInputPort.execute(TestFixtures.FROM_ACCOUNT_ID)
         } returns AccountStatementResult(
             accountId = TestFixtures.FROM_ACCOUNT_ID,
             entries = listOf(
@@ -179,7 +173,7 @@ class AccountControllerWebMvcTest(
             }
 
         verify(exactly = 1) {
-            getAccountStatementInputPort.execute(
+            accountStatementInputPort.execute(
                 TestFixtures.FROM_ACCOUNT_ID
             )
         }

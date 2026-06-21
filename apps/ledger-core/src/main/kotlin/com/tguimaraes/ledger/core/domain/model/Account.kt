@@ -2,7 +2,7 @@ package com.tguimaraes.ledger.core.domain.model
 
 import com.tguimaraes.ledger.core.domain.exception.InvalidAccountOwnerNameException
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 data class Account(
     val id: UUID,
