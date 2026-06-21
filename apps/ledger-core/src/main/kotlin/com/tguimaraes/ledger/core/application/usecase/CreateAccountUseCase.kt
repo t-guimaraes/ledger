@@ -12,7 +12,6 @@ import java.time.Instant
 class CreateAccountUseCase(
     private val accountRepository: AccountRepositoryPort,
     private val idGenerator: IdGeneratorPort,
-    private val clock: Clock
 ) : CreateAccountInputPort {
 
     override fun execute(
@@ -24,7 +23,7 @@ class CreateAccountUseCase(
         val account = Account.create(
             id = idGenerator.generate(),
             ownerName = ownerName,
-            createdAt = Instant.now(clock)
+            createdAt = Instant.now()
         )
 
         accountRepository.save(account)
