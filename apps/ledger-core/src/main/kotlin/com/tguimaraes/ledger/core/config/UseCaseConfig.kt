@@ -1,7 +1,9 @@
 package com.tguimaraes.ledger.core.config
 
+import com.tguimaraes.ledger.core.adapter.outbound.transaction.TransactionalCreateAccountDepositAdapter
 import com.tguimaraes.ledger.core.adapter.outbound.transaction.TransactionalCreateAccountAdapter
 import com.tguimaraes.ledger.core.adapter.outbound.transaction.TransactionalCreateTransferAdapter
+import com.tguimaraes.ledger.core.application.port.input.CreateAccountDepositInputPort
 import com.tguimaraes.ledger.core.application.port.input.CreateAccountInputPort
 import com.tguimaraes.ledger.core.application.port.input.CreateTransferInputPort
 import com.tguimaraes.ledger.core.application.port.input.GetAccountBalanceInputPort
@@ -12,10 +14,12 @@ import com.tguimaraes.ledger.core.application.port.output.query.EntryQueryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.AccountRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.EntryRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.TransactionRepositoryPort
+import com.tguimaraes.ledger.core.application.usecase.CreateAccountDepositUseCase
 import com.tguimaraes.ledger.core.application.usecase.CreateAccountUseCase
 import com.tguimaraes.ledger.core.application.usecase.CreateTransferUseCase
 import com.tguimaraes.ledger.core.application.usecase.GetAccountBalanceUseCase
 import com.tguimaraes.ledger.core.application.usecase.GetAccountStatementUseCase
+import com.tguimaraes.ledger.core.domain.service.AccountDomainService
 import com.tguimaraes.ledger.core.domain.service.TransferDomainService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -40,6 +44,36 @@ class UseCaseConfig {
     }
 
     @Bean
+    fun accountDeposit(
+        accountRepositoryPort: AccountRepositoryPort,
+        transactionRepositoryPort: TransactionRepositoryPort,
+        entryRepositoryPort: EntryRepositoryPort,
+        idempotencyPort: IdempotencyPort,
+        accountDomainService: AccountDomainService,
+        transactionManager: PlatformTransactionManager
+    ): CreateAccountDepositInputPort {
+        return TransactionalCreateAccountDepositAdapter(
+            CreateAccountDepositUseCase(accountRepositoryPort, transactionRepositoryPort, entryRepositoryPort, idempotencyPort, accountDomainService),
+            TransactionTemplate(transactionManager)
+        )
+    }
+
+    @Bean
+    fun getAccountBalanceUseCase(
+        entryQueryPort: EntryQueryPort,
+        accountRepositoryPort: AccountRepositoryPort
+    ): GetAccountBalanceInputPort {
+        return GetAccountBalanceUseCase(entryQueryPort, accountRepositoryPort)
+    }
+
+    @Bean
+    fun getAccountStatementUseCase(
+        entryQueryPort: EntryQueryPort
+    ) : GetAccountStatementInputPort {
+        return GetAccountStatementUseCase(entryQueryPort)
+    }
+
+    @Bean
     fun createTransferUseCase(
         accountRepositoryPort: AccountRepositoryPort,
         transactionRepositoryPort: TransactionRepositoryPort,
@@ -60,21 +94,6 @@ class UseCaseConfig {
             ),
             TransactionTemplate(transactionManager)
         )
-    }
-
-    @Bean
-    fun getAccountBalanceUseCase(
-        entryQueryPort: EntryQueryPort,
-        accountRepositoryPort: AccountRepositoryPort
-    ): GetAccountBalanceInputPort {
-        return GetAccountBalanceUseCase(entryQueryPort, accountRepositoryPort)
-    }
-
-    @Bean
-    fun getAccountStatementUseCase(
-        entryQueryPort: EntryQueryPort
-    ) : GetAccountStatementInputPort {
-        return GetAccountStatementUseCase(entryQueryPort)
     }
 
     @Bean

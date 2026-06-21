@@ -2,6 +2,8 @@ package com.tguimaraes.ledger.core.adapter.inbound.web.doc
 
 import com.tguimaraes.ledger.core.adapter.inbound.web.dto.AccountStatementResponse
 import com.tguimaraes.ledger.core.adapter.inbound.web.dto.AccountBalanceResponse
+import com.tguimaraes.ledger.core.adapter.inbound.web.dto.AccountDepositRequest
+import com.tguimaraes.ledger.core.adapter.inbound.web.dto.AccountDepositResponse
 import com.tguimaraes.ledger.core.adapter.inbound.web.dto.CreateAccountRequest
 import com.tguimaraes.ledger.core.adapter.inbound.web.dto.CreateAccountResponse
 import io.swagger.v3.oas.annotations.Operation
@@ -25,6 +27,29 @@ interface AccountApi {
         )
         request: CreateAccountRequest,
     ): ResponseEntity<CreateAccountResponse>
+
+    @Operation(
+        summary = "Deposit an account",
+        description = "Deposit money in account."
+    )
+    fun deposit(
+        @Parameter(
+            description = "UUID of the account",
+            example = "11111111-1111-1111-1111-111111111111"
+        )
+        accountId: UUID,
+        @Parameter(
+            description = "Unique key used to guarantee idempotent requests",
+            example = "Idempotency-Key",
+            required = true
+        )
+        idempotencyKey: String,
+        @RequestBody(
+            required = true,
+            description = "Account deposit payload"
+        )
+        request: AccountDepositRequest,
+    ): ResponseEntity<AccountDepositResponse>
 
     @Operation(
         summary = "Get account balance",

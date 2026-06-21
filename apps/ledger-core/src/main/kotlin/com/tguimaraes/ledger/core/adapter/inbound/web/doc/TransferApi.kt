@@ -15,8 +15,8 @@ interface TransferApi {
     fun transfer(
 
         @Parameter(
-            name = "Idempotency-Key",
             description = "Unique key used to guarantee idempotent requests",
+            example = "Idempotency-Key",
             required = true
         )
         idempotencyKey: String,
