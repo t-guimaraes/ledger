@@ -1,12 +1,12 @@
 package com.tguimaraes.ledger.core.application.usecase.account
 
-import com.tguimaraes.ledger.core.application.dto.account.AccountDepositCommand
+import com.tguimaraes.ledger.core.application.dto.account.AccountWithdrawCommand
 import com.tguimaraes.ledger.core.application.port.output.idempotency.IdempotencyPort
 import com.tguimaraes.ledger.core.application.port.output.repository.AccountRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.EntryRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.TransactionRepositoryPort
-import com.tguimaraes.ledger.core.application.usecase.AccountDepositUseCase
-import com.tguimaraes.ledger.core.domain.dto.DepositResult
+import com.tguimaraes.ledger.core.application.usecase.AccountWithdrawUseCase
+import com.tguimaraes.ledger.core.domain.dto.WithdrawResult
 import com.tguimaraes.ledger.core.domain.exception.AccountNotFoundException
 import com.tguimaraes.ledger.core.domain.exception.IdempotencyException
 import com.tguimaraes.ledger.core.domain.service.AccountDomainService
@@ -17,20 +17,20 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 
-class AccountDepositUseCaseTest {
+class AccountWithdrawUseCaseTest {
     private val accountRepositoryPort = mockk<AccountRepositoryPort>()
     private val transactionRepositoryPort = mockk<TransactionRepositoryPort>()
     private val entryRepositoryPort = mockk<EntryRepositoryPort>()
     private val idempotencyPort = mockk<IdempotencyPort>()
     private val accountDomainService = mockk<AccountDomainService>()
 
-    private lateinit var useCase: AccountDepositUseCase
+    private lateinit var useCase: AccountWithdrawUseCase
 
     private val amount = BigDecimal("1500.00")
 
     @BeforeEach
     fun setup() {
-        useCase = AccountDepositUseCase(
+        useCase = AccountWithdrawUseCase(
             accountRepositoryPort,
             transactionRepositoryPort,
             entryRepositoryPort,
@@ -51,8 +51,8 @@ class AccountDepositUseCaseTest {
         Assertions.assertThrows(
             IdempotencyException::class.java
         ) {
-            useCase.deposit(
-                AccountDepositCommand(amount),
+            useCase.withdraw(
+                AccountWithdrawCommand(amount),
                 TestFixtures.FROM_ACCOUNT_ID,
                 TestFixtures.IDEMPOTENCY_KEY
             )
@@ -79,8 +79,8 @@ class AccountDepositUseCaseTest {
         Assertions.assertThrows(
             AccountNotFoundException::class.java
         ) {
-            useCase.deposit(
-                AccountDepositCommand(amount),
+            useCase.withdraw(
+                AccountWithdrawCommand(amount),
                 TestFixtures.FROM_ACCOUNT_ID,
                 TestFixtures.IDEMPOTENCY_KEY
             )
@@ -100,8 +100,8 @@ class AccountDepositUseCaseTest {
     }
 
     @Test
-    fun `should persist deposit successfully`() {
-        val depositResult = DepositResult(
+    fun `should persist withdraw successfully`() {
+        val withdrawResult = WithdrawResult(
             TestFixtures.transaction(),
             listOf(TestFixtures.creditEntry())
         )
@@ -115,23 +115,23 @@ class AccountDepositUseCaseTest {
         } returns TestFixtures.fromAccount()
 
         every {
-            accountDomainService.deposit(TestFixtures.FROM_ACCOUNT_ID, amount)
-        } returns depositResult
+            accountDomainService.withdraw(TestFixtures.FROM_ACCOUNT_ID, amount)
+        } returns withdrawResult
 
         every {
-            transactionRepositoryPort.save(depositResult.transaction)
+            transactionRepositoryPort.save(withdrawResult.transaction)
         } just runs
 
         every {
-            entryRepositoryPort.saveAll(depositResult.entries)
+            entryRepositoryPort.saveAll(withdrawResult.entries)
         } just runs
 
         every {
             idempotencyPort.save(TestFixtures.IDEMPOTENCY_KEY)
         } just runs
 
-        useCase.deposit(
-            AccountDepositCommand(amount),
+        useCase.withdraw(
+            AccountWithdrawCommand(amount),
             TestFixtures.FROM_ACCOUNT_ID,
             TestFixtures.IDEMPOTENCY_KEY
         )
@@ -145,15 +145,15 @@ class AccountDepositUseCaseTest {
         }
 
         verify(exactly = 1) {
-            accountDomainService.deposit(TestFixtures.FROM_ACCOUNT_ID, amount)
+            accountDomainService.withdraw(TestFixtures.FROM_ACCOUNT_ID, amount)
         }
 
         verify(exactly = 1) {
-            transactionRepositoryPort.save(depositResult.transaction)
+            transactionRepositoryPort.save(withdrawResult.transaction)
         }
 
         verify(exactly = 1) {
-            entryRepositoryPort.saveAll(depositResult.entries)
+            entryRepositoryPort.saveAll(withdrawResult.entries)
         }
 
         verify(exactly = 1) {

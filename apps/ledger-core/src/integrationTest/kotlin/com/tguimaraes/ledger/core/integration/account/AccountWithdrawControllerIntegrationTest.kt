@@ -1,7 +1,7 @@
 package com.tguimaraes.ledger.core.integration.account
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.tguimaraes.ledger.core.adapter.inbound.web.dto.account.AccountDepositRequest
+import com.tguimaraes.ledger.core.adapter.inbound.web.dto.account.AccountWithdrawRequest
 import com.tguimaraes.ledger.core.integration.support.AbstractIntegrationTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -18,7 +18,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @AutoConfigureMockMvc
-class AccountDepositControllerIntegrationTest : AbstractIntegrationTest() {
+class AccountWithdrawControllerIntegrationTest : AbstractIntegrationTest() {
 
     @Autowired
     private lateinit var mockMvc: MockMvc
@@ -28,23 +28,24 @@ class AccountDepositControllerIntegrationTest : AbstractIntegrationTest() {
 
     private lateinit var accountId: UUID
     private lateinit var amount: BigDecimal
-    private lateinit var request: AccountDepositRequest
+    private lateinit var request: AccountWithdrawRequest
 
     @BeforeEach
     fun setup() {
         accountId = UUID.randomUUID()
         amount = BigDecimal("1000.00")
-        request = AccountDepositRequest(amount)
+        request = AccountWithdrawRequest(amount)
 
         cleanEnvironment()
         createAccount(accountId, "Thiago");
     }
 
     @Test
-    fun `should account deposit successfully`() {
+    fun `should account withdraw successfully`() {
+        fundAccount(accountId, amount)
 
         val response = mockMvc.perform(
-            MockMvcRequestBuilders.post("/accounts/${accountId}/deposit")
+            MockMvcRequestBuilders.post("/accounts/${accountId}/withdraw")
                 .header(
                     "Idempotency-Key",
                     "integration-key"
@@ -79,7 +80,7 @@ class AccountDepositControllerIntegrationTest : AbstractIntegrationTest() {
         createIdempotencyKey("duplicate-key")
 
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/accounts/${accountId}/deposit")
+            MockMvcRequestBuilders.post("/accounts/${accountId}/withdraw")
                 .header(
                     "Idempotency-Key",
                     "duplicate-key"
@@ -105,10 +106,10 @@ class AccountDepositControllerIntegrationTest : AbstractIntegrationTest() {
     @Test
     fun `should return bad request when amount is less or equal 0`() {
 
-        val request2 = AccountDepositRequest(BigDecimal.ZERO)
+        val request2 = AccountWithdrawRequest(BigDecimal.ZERO)
 
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/accounts/${accountId}/deposit")
+            MockMvcRequestBuilders.post("/accounts/${accountId}/withdraw")
                 .header(
                     "Idempotency-Key",
                     "integration-key"

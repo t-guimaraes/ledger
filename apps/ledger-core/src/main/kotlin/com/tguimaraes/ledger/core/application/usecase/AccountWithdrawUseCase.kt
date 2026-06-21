@@ -1,45 +1,45 @@
 package com.tguimaraes.ledger.core.application.usecase
 
-import com.tguimaraes.ledger.core.application.dto.account.AccountDepositCommand
-import com.tguimaraes.ledger.core.application.dto.account.AccountDepositResult
-import com.tguimaraes.ledger.core.application.port.input.AccountDepositInputPort
+import com.tguimaraes.ledger.core.application.dto.account.AccountWithdrawCommand
+import com.tguimaraes.ledger.core.application.dto.account.AccountWithdrawResult
+import com.tguimaraes.ledger.core.application.port.input.AccountWithdrawInputPort
 import com.tguimaraes.ledger.core.application.port.output.idempotency.IdempotencyPort
 import com.tguimaraes.ledger.core.application.port.output.repository.AccountRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.EntryRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.TransactionRepositoryPort
-import com.tguimaraes.ledger.core.domain.dto.DepositResult
+import com.tguimaraes.ledger.core.domain.dto.WithdrawResult
 import com.tguimaraes.ledger.core.domain.exception.AccountNotFoundException
 import com.tguimaraes.ledger.core.domain.exception.IdempotencyException
 import com.tguimaraes.ledger.core.domain.service.AccountDomainService
 import java.util.*
 
-class AccountDepositUseCase(
+class AccountWithdrawUseCase(
     private val accountRepositoryPort: AccountRepositoryPort,
     private val transactionRepositoryPort: TransactionRepositoryPort,
     private val entryRepositoryPort: EntryRepositoryPort,
     private val idempotencyPort: IdempotencyPort,
     private val accountDomainService: AccountDomainService
-) : AccountDepositInputPort {
+) : AccountWithdrawInputPort {
 
-    override fun deposit(
-        command: AccountDepositCommand,
+    override fun withdraw(
+        command: AccountWithdrawCommand,
         accountId: UUID,
         idempotencyKey: String
-    ): AccountDepositResult {
+    ): AccountWithdrawResult {
 
         validateIdempotency(idempotencyKey)
         accountRepositoryPort.findById(accountId) ?: throw AccountNotFoundException(accountId)
 
-        val deposit = accountDomainService.deposit(
+        val withdraw = accountDomainService.withdraw(
             accountId,
             command.amount
         )
 
-        persistDeposit(deposit, idempotencyKey)
+        persistWithdraw(withdraw, idempotencyKey)
 
-        return AccountDepositResult(
+        return AccountWithdrawResult(
             accountId,
-            deposit.transaction.amount
+            withdraw.transaction.amount
         )
     }
 
@@ -49,9 +49,9 @@ class AccountDepositUseCase(
         }
     }
 
-    private fun persistDeposit(depositResult: DepositResult, idempotencyKey: String) {
-        transactionRepositoryPort.save(depositResult.transaction)
-        entryRepositoryPort.saveAll(depositResult.entries)
+    private fun persistWithdraw(withdrawResult: WithdrawResult, idempotencyKey: String) {
+        transactionRepositoryPort.save(withdrawResult.transaction)
+        entryRepositoryPort.saveAll(withdrawResult.entries)
         idempotencyPort.save(idempotencyKey)
     }
 }
