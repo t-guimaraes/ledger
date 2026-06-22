@@ -1,4 +1,4 @@
-package com.tguimaraes.ledger.core.integration.account
+package com.tguimaraes.ledger.core.integration.account.controller
 
 import com.tguimaraes.ledger.core.integration.support.AbstractIntegrationTest
 import org.junit.jupiter.api.BeforeEach

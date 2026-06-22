@@ -83,9 +83,10 @@ class UseCaseConfig {
 
     @Bean
     fun getAccountStatementUseCase(
-        entryQueryPort: EntryQueryPort
+        entryQueryPort: EntryQueryPort,
+        accountRepositoryPort: AccountRepositoryPort
     ) : AccountStatementInputPort {
-        return AccountStatementUseCase(entryQueryPort)
+        return AccountStatementUseCase(entryQueryPort, accountRepositoryPort)
     }
 
     @Bean

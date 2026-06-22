@@ -1,9 +1,9 @@
-package com.tguimaraes.ledger.core.integration.account
+package com.tguimaraes.ledger.core.integration.account.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.tguimaraes.ledger.core.adapter.inbound.web.dto.account.AccountDepositRequest
 import com.tguimaraes.ledger.core.integration.support.AbstractIntegrationTest
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -11,7 +11,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import java.math.BigDecimal
 import java.util.*
 import kotlin.test.assertEquals
@@ -54,7 +54,7 @@ class AccountDepositControllerIntegrationTest : AbstractIntegrationTest() {
                     objectMapper.writeValueAsString(request)
                 )
         )
-            .andExpect(status().isCreated)
+            .andExpect(MockMvcResultMatchers.status().isCreated)
             .andReturn()
             .response
             .contentAsString
@@ -66,7 +66,7 @@ class AccountDepositControllerIntegrationTest : AbstractIntegrationTest() {
             UUID.fromString(json.get("accountId").asText())
         )
 
-        assertThat(BigDecimal(json.get("amount").asText())).isEqualByComparingTo(amount)
+        Assertions.assertThat(BigDecimal(json.get("amount").asText())).isEqualByComparingTo(amount)
 
         assertTrue(
             idempotencyRepository.existsById("integration-key")
@@ -89,7 +89,7 @@ class AccountDepositControllerIntegrationTest : AbstractIntegrationTest() {
                     objectMapper.writeValueAsString(request)
                 )
         )
-            .andExpect(status().isConflict)
+            .andExpect(MockMvcResultMatchers.status().isConflict)
 
         assertEquals(
             0,
@@ -118,7 +118,7 @@ class AccountDepositControllerIntegrationTest : AbstractIntegrationTest() {
                     objectMapper.writeValueAsString(request2)
                 )
         )
-            .andExpect(status().isBadRequest)
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
 
         assertEquals(
             0,
