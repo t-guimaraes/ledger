@@ -1,4 +1,4 @@
-package com.tguimaraes.ledger.core.integration.account
+package com.tguimaraes.ledger.core.integration.account.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.tguimaraes.ledger.core.integration.support.AbstractIntegrationTest
