@@ -5,6 +5,7 @@ import com.tguimaraes.ledger.core.adapter.outbound.transaction.TransactionalAcco
 import com.tguimaraes.ledger.core.adapter.outbound.transaction.TransactionalCreateAccountAdapter
 import com.tguimaraes.ledger.core.adapter.outbound.transaction.TransactionalTransferAdapter
 import com.tguimaraes.ledger.core.application.port.input.*
+import com.tguimaraes.ledger.core.application.port.output.event.EventPublisherPort
 import com.tguimaraes.ledger.core.application.port.output.idempotency.IdempotencyPort
 import com.tguimaraes.ledger.core.application.port.output.query.EntryQueryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.AccountRepositoryPort
@@ -38,6 +39,7 @@ class UseCaseConfig {
         transactionRepositoryPort: TransactionRepositoryPort,
         entryRepositoryPort: EntryRepositoryPort,
         idempotencyPort: IdempotencyPort,
+        eventPublisherPort: EventPublisherPort,
         accountDomainService: AccountDomainService,
         transactionManager: PlatformTransactionManager
     ): AccountDepositInputPort {
@@ -47,6 +49,7 @@ class UseCaseConfig {
                 transactionRepositoryPort,
                 entryRepositoryPort,
                 idempotencyPort,
+                eventPublisherPort,
                 accountDomainService),
             TransactionTemplate(transactionManager)
         )

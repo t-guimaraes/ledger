@@ -48,6 +48,8 @@ dependencies {
 	testImplementation("org.testcontainers:junit-jupiter")
 	testImplementation("org.testcontainers:kafka")
 	testImplementation("org.testcontainers:postgresql")
+	testImplementation("io.rest-assured:rest-assured")
+	testImplementation("org.awaitility:awaitility")
 
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

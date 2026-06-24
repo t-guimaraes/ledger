@@ -3,11 +3,13 @@ package com.tguimaraes.ledger.core.application.usecase
 import com.tguimaraes.ledger.core.application.dto.account.AccountDepositCommand
 import com.tguimaraes.ledger.core.application.dto.account.AccountDepositResult
 import com.tguimaraes.ledger.core.application.port.input.AccountDepositInputPort
+import com.tguimaraes.ledger.core.application.port.output.event.EventPublisherPort
 import com.tguimaraes.ledger.core.application.port.output.idempotency.IdempotencyPort
 import com.tguimaraes.ledger.core.application.port.output.repository.AccountRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.EntryRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.TransactionRepositoryPort
 import com.tguimaraes.ledger.core.domain.dto.DepositResult
+import com.tguimaraes.ledger.core.domain.event.account.AccountDepositedEvent
 import com.tguimaraes.ledger.core.domain.exception.AccountNotFoundException
 import com.tguimaraes.ledger.core.domain.exception.IdempotencyException
 import com.tguimaraes.ledger.core.domain.service.AccountDomainService
@@ -18,6 +20,7 @@ class AccountDepositUseCase(
     private val transactionRepositoryPort: TransactionRepositoryPort,
     private val entryRepositoryPort: EntryRepositoryPort,
     private val idempotencyPort: IdempotencyPort,
+    private val eventPublisherPort: EventPublisherPort,
     private val accountDomainService: AccountDomainService
 ) : AccountDepositInputPort {
 
@@ -36,6 +39,15 @@ class AccountDepositUseCase(
         )
 
         persistDeposit(deposit, idempotencyKey)
+
+        eventPublisherPort.publish(
+            AccountDepositedEvent(
+                transactionId = deposit.transaction.id,
+                accountId = accountId,
+                amount = deposit.transaction.amount,
+                occurredAt = deposit.transaction.createdAt
+            )
+        )
 
         return AccountDepositResult(
             accountId,
