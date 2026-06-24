@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
+import org.testcontainers.kafka.KafkaContainer
+import org.testcontainers.utility.DockerImageName
 import java.math.BigDecimal
 import java.time.Instant
 import java.util.*
@@ -37,6 +39,16 @@ abstract class AbstractIntegrationTest {
 
     protected lateinit var fromAccountId: UUID
     protected lateinit var toAccountId: UUID
+
+    companion object {
+
+        @JvmStatic
+        val kafkaContainer = KafkaContainer(
+            DockerImageName.parse("apache/kafka:4.0.0")
+        ).apply {
+            start()
+        }
+    }
 
     protected fun cleanDatabase() {
         idempotencyRepository.deleteAll()
