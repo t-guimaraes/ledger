@@ -1,4 +1,4 @@
-package com.tguimaraes.ledger.core.integration.transfer
+package com.tguimaraes.ledger.core.integration.transfer.controller
 
 import com.tguimaraes.ledger.core.adapter.inbound.web.dto.transfer.TransferRequest
 import com.tguimaraes.ledger.core.domain.model.EntryType
@@ -9,10 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import java.math.BigDecimal
-import java.util.*
+import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -57,7 +57,7 @@ class TransferControllerIntegrationTest : AbstractIntegrationTest() {
             )
 
         mockMvc.perform(
-            post("/transfers")
+            MockMvcRequestBuilders.post("/transfers")
                 .header(
                     "Idempotency-Key",
                     "integration-key"
@@ -67,7 +67,7 @@ class TransferControllerIntegrationTest : AbstractIntegrationTest() {
                     objectMapper.writeValueAsString(request)
                 )
         )
-            .andExpect(status().isCreated)
+            .andExpect(MockMvcResultMatchers.status().isCreated)
 
         val entries = entryRepository.findAll()
 
@@ -119,7 +119,7 @@ class TransferControllerIntegrationTest : AbstractIntegrationTest() {
             )
 
         mockMvc.perform(
-            post("/transfers")
+            MockMvcRequestBuilders.post("/transfers")
                 .header(
                     "Idempotency-Key",
                     "duplicate-key"
@@ -129,7 +129,7 @@ class TransferControllerIntegrationTest : AbstractIntegrationTest() {
                     objectMapper.writeValueAsString(request)
                 )
         )
-            .andExpect(status().isConflict)
+            .andExpect(MockMvcResultMatchers.status().isConflict)
 
         assertEquals(
             1,
@@ -153,7 +153,7 @@ class TransferControllerIntegrationTest : AbstractIntegrationTest() {
             )
 
         mockMvc.perform(
-            post("/transfers")
+            MockMvcRequestBuilders.post("/transfers")
                 .header(
                     "Idempotency-Key",
                     "insufficient-balance"
@@ -164,7 +164,7 @@ class TransferControllerIntegrationTest : AbstractIntegrationTest() {
                 )
         )
             .andExpect(
-                status().isUnprocessableEntity
+                MockMvcResultMatchers.status().isUnprocessableEntity
             )
 
         assertEquals(
@@ -189,7 +189,7 @@ class TransferControllerIntegrationTest : AbstractIntegrationTest() {
             )
 
         mockMvc.perform(
-            post("/transfers")
+            MockMvcRequestBuilders.post("/transfers")
                 .header(
                     "Idempotency-Key",
                     "not-found"
@@ -199,7 +199,7 @@ class TransferControllerIntegrationTest : AbstractIntegrationTest() {
                     objectMapper.writeValueAsString(request)
                 )
         )
-            .andExpect(status().isNotFound)
+            .andExpect(MockMvcResultMatchers.status().isNotFound)
     }
 
     @Test
@@ -213,7 +213,7 @@ class TransferControllerIntegrationTest : AbstractIntegrationTest() {
             )
 
         mockMvc.perform(
-            post("/transfers")
+            MockMvcRequestBuilders.post("/transfers")
                 .header(
                     "Idempotency-Key",
                     "bad-request"
@@ -223,6 +223,6 @@ class TransferControllerIntegrationTest : AbstractIntegrationTest() {
                     objectMapper.writeValueAsString(request)
                 )
         )
-            .andExpect(status().isBadRequest)
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
     }
 }
