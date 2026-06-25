@@ -23,26 +23,18 @@ import java.time.Instant
 import java.util.*
 
 class TransferUseCaseTest {
-    private lateinit var accountRepositoryPort: AccountRepositoryPort
-    private lateinit var transactionRepositoryPort: TransactionRepositoryPort
-    private lateinit var entryRepositoryPort: EntryRepositoryPort
-    private lateinit var entryQueryPort: EntryQueryPort
-    private lateinit var idempotencyPort: IdempotencyPort
+    private val accountRepositoryPort = mockk<AccountRepositoryPort>()
+    private val transactionRepositoryPort = mockk<TransactionRepositoryPort>()
+    private val entryRepositoryPort = mockk<EntryRepositoryPort>()
+    private val entryQueryPort = mockk<EntryQueryPort>()
+    private val idempotencyPort = mockk<IdempotencyPort>()
     private val eventPublisherPort = mockk<EventPublisherPort>()
-    private lateinit var transferDomainService: TransferDomainService
+    private val transferDomainService = mockk<TransferDomainService>()
 
     private lateinit var useCase: TransferUseCase
 
     @BeforeEach
     fun setup() {
-
-        accountRepositoryPort = mockk()
-        transactionRepositoryPort = mockk()
-        entryRepositoryPort = mockk()
-        entryQueryPort = mockk()
-        idempotencyPort = mockk()
-        transferDomainService = mockk()
-
         useCase = TransferUseCase(
             accountRepositoryPort,
             transactionRepositoryPort,

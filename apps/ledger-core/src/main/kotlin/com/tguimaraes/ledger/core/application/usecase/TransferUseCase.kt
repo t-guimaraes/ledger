@@ -9,7 +9,6 @@ import com.tguimaraes.ledger.core.application.port.output.repository.AccountRepo
 import com.tguimaraes.ledger.core.application.port.output.repository.EntryRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.TransactionRepositoryPort
 import com.tguimaraes.ledger.core.domain.dto.TransferResult
-import com.tguimaraes.ledger.core.domain.event.account.AccountWithdrawEvent
 import com.tguimaraes.ledger.core.domain.event.transfer.TransferEvent
 import com.tguimaraes.ledger.core.domain.exception.AccountNotFoundException
 import com.tguimaraes.ledger.core.domain.exception.IdempotencyException

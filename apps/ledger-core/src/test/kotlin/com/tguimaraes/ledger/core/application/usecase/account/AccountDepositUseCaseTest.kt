@@ -28,10 +28,12 @@ class AccountDepositUseCaseTest {
 
     private lateinit var useCase: AccountDepositUseCase
 
-    private val amount = BigDecimal("1500.00")
+    private lateinit var amount: BigDecimal
 
     @BeforeEach
     fun setup() {
+        amount = BigDecimal("1500.00")
+
         useCase = AccountDepositUseCase(
             accountRepositoryPort,
             transactionRepositoryPort,

@@ -13,17 +13,13 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class AccountStatementUseCaseTest {
-
-    private lateinit var entryQueryPort: EntryQueryPort
-    private lateinit var accountRepositoryPort: AccountRepositoryPort
+    private val entryQueryPort = mockk<EntryQueryPort>()
+    private val accountRepositoryPort = mockk<AccountRepositoryPort>()
 
     private lateinit var useCase: AccountStatementUseCase
 
     @BeforeEach
     fun setup() {
-        entryQueryPort = mockk()
-        accountRepositoryPort = mockk()
-
         useCase =
             AccountStatementUseCase(
                 entryQueryPort,
