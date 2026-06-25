@@ -10,21 +10,25 @@ import org.testcontainers.utility.DockerImageName
 @TestConfiguration(proxyBeanMethods = false)
 class TestcontainersConfiguration {
 
-    @Bean
-    @ServiceConnection
-    fun kafkaContainer(): KafkaContainer {
-        return KafkaContainer(DockerImageName.parse("apache/kafka:4.0.0"))
-    }
+    companion object {
+        private val kafkaInstance = KafkaContainer(DockerImageName.parse("apache/kafka:4.0.0"))
+        private val postgresInstance = PostgreSQLContainer(DockerImageName.parse("postgres:16"))
+        // private val redisInstance = GenericContainer(DockerImageName.parse("redis:7-alpine")).withExposedPorts(6379)
 
-    @Bean
-    @ServiceConnection
-    fun postgresContainer(): PostgreSQLContainer<*> {
-        return PostgreSQLContainer(DockerImageName.parse("postgres:16"))
-    }
+        @Bean
+        @ServiceConnection
+        @JvmStatic
+        fun kafkaContainer(): KafkaContainer = kafkaInstance
 
-//    @Bean
-//    @ServiceConnection(name = "redis")
-//    fun redisContainer(): GenericContainer<*> {
-//        return GenericContainer(DockerImageName.parse("redis:7-alpine")).withExposedPorts(6379)
-//    }
+        @Bean
+        @ServiceConnection
+        @JvmStatic
+        fun postgresContainer(): PostgreSQLContainer<*> = postgresInstance
+
+
+        // @Bean
+        // @ServiceConnection(name = "redis")
+        // @JvmStatic
+        // fun redisContainer(): GenericContainer<*> = redisInstance
+    }
 }

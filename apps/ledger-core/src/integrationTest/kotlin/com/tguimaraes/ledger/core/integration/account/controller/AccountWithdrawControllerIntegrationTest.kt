@@ -1,6 +1,5 @@
 package com.tguimaraes.ledger.core.integration.account.controller
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.tguimaraes.ledger.core.adapter.inbound.web.dto.account.AccountWithdrawRequest
 import com.tguimaraes.ledger.core.integration.support.AbstractIntegrationTest
 import org.assertj.core.api.Assertions
@@ -22,9 +21,6 @@ class AccountWithdrawControllerIntegrationTest : AbstractIntegrationTest() {
 
     @Autowired
     private lateinit var mockMvc: MockMvc
-
-    @Autowired
-    private lateinit var objectMapper: ObjectMapper
 
     private lateinit var accountId: UUID
     private lateinit var amount: BigDecimal

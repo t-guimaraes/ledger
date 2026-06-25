@@ -9,7 +9,7 @@ import com.tguimaraes.ledger.core.application.port.output.repository.AccountRepo
 import com.tguimaraes.ledger.core.application.port.output.repository.EntryRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.TransactionRepositoryPort
 import com.tguimaraes.ledger.core.domain.dto.DepositResult
-import com.tguimaraes.ledger.core.domain.event.account.AccountDepositedEvent
+import com.tguimaraes.ledger.core.domain.event.account.AccountDepositEvent
 import com.tguimaraes.ledger.core.domain.exception.AccountNotFoundException
 import com.tguimaraes.ledger.core.domain.exception.IdempotencyException
 import com.tguimaraes.ledger.core.domain.service.AccountDomainService
@@ -41,7 +41,7 @@ class AccountDepositUseCase(
         persistDeposit(deposit, idempotencyKey)
 
         eventPublisherPort.publish(
-            AccountDepositedEvent(
+            AccountDepositEvent(
                 transactionId = deposit.transaction.id,
                 accountId = accountId,
                 amount = deposit.transaction.amount,
