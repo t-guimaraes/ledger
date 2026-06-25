@@ -61,6 +61,7 @@ class UseCaseConfig {
         transactionRepositoryPort: TransactionRepositoryPort,
         entryRepositoryPort: EntryRepositoryPort,
         idempotencyPort: IdempotencyPort,
+        eventPublisherPort: EventPublisherPort,
         accountDomainService: AccountDomainService,
         transactionManager: PlatformTransactionManager
     ): AccountWithdrawInputPort {
@@ -70,6 +71,7 @@ class UseCaseConfig {
                 transactionRepositoryPort,
                 entryRepositoryPort,
                 idempotencyPort,
+                eventPublisherPort,
                 accountDomainService
             ),
             TransactionTemplate(transactionManager)

@@ -1,6 +1,5 @@
 package com.tguimaraes.ledger.core.integration.transfer
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.tguimaraes.ledger.core.adapter.inbound.web.dto.transfer.TransferRequest
 import com.tguimaraes.ledger.core.domain.model.EntryType
 import com.tguimaraes.ledger.core.integration.support.AbstractIntegrationTest
@@ -22,9 +21,6 @@ class TransferControllerIntegrationTest : AbstractIntegrationTest() {
 
     @Autowired
     private lateinit var mockMvc: MockMvc
-
-    @Autowired
-    private lateinit var objectMapper: ObjectMapper
 
     @BeforeEach
     fun setup() {

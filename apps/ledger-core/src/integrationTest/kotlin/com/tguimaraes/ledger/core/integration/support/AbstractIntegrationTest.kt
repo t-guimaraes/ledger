@@ -1,5 +1,6 @@
 package com.tguimaraes.ledger.core.integration.support
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.AccountJpaEntity
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.EntryJpaEntity
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.IdempotencyKeyJpaEntity
@@ -12,18 +13,24 @@ import com.tguimaraes.ledger.core.domain.model.EntryType
 import com.tguimaraes.ledger.core.support.TestcontainersConfiguration
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.context.annotation.Import
+import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.test.context.ActiveProfiles
-import org.testcontainers.kafka.KafkaContainer
-import org.testcontainers.utility.DockerImageName
 import java.math.BigDecimal
 import java.time.Instant
 import java.util.*
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Import(TestcontainersConfiguration::class)
 abstract class AbstractIntegrationTest {
+
+    @Autowired
+    lateinit var kafkaTemplate: KafkaTemplate<String, String>
+
+    @Autowired
+    lateinit var objectMapper: ObjectMapper
 
     @Autowired
     protected lateinit var entryRepository: EntryJpaRepository
@@ -37,18 +44,11 @@ abstract class AbstractIntegrationTest {
     @Autowired
     protected lateinit var idempotencyRepository: IdempotencyKeyJpaRepository
 
+    @LocalServerPort
+    var port: Int = 8080
+
     protected lateinit var fromAccountId: UUID
     protected lateinit var toAccountId: UUID
-
-    companion object {
-
-        @JvmStatic
-        val kafkaContainer = KafkaContainer(
-            DockerImageName.parse("apache/kafka:4.0.0")
-        ).apply {
-            start()
-        }
-    }
 
     protected fun cleanDatabase() {
         idempotencyRepository.deleteAll()

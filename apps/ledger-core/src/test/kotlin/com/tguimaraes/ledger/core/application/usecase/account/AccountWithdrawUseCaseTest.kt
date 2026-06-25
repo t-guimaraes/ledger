@@ -1,6 +1,7 @@
 package com.tguimaraes.ledger.core.application.usecase.account
 
 import com.tguimaraes.ledger.core.application.dto.account.AccountWithdrawCommand
+import com.tguimaraes.ledger.core.application.port.output.event.EventPublisherPort
 import com.tguimaraes.ledger.core.application.port.output.idempotency.IdempotencyPort
 import com.tguimaraes.ledger.core.application.port.output.repository.AccountRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.EntryRepositoryPort
@@ -22,6 +23,7 @@ class AccountWithdrawUseCaseTest {
     private val transactionRepositoryPort = mockk<TransactionRepositoryPort>()
     private val entryRepositoryPort = mockk<EntryRepositoryPort>()
     private val idempotencyPort = mockk<IdempotencyPort>()
+    private val eventPublisherPort = mockk<EventPublisherPort>()
     private val accountDomainService = mockk<AccountDomainService>()
 
     private lateinit var useCase: AccountWithdrawUseCase
@@ -35,6 +37,7 @@ class AccountWithdrawUseCaseTest {
             transactionRepositoryPort,
             entryRepositoryPort,
             idempotencyPort,
+            eventPublisherPort,
             accountDomainService
         )
     }
@@ -113,6 +116,10 @@ class AccountWithdrawUseCaseTest {
         every {
             accountRepositoryPort.findById(TestFixtures.FROM_ACCOUNT_ID)
         } returns TestFixtures.fromAccount()
+
+        every {
+            eventPublisherPort.publish(any())
+        } just runs
 
         every {
             accountDomainService.withdraw(TestFixtures.FROM_ACCOUNT_ID, amount)

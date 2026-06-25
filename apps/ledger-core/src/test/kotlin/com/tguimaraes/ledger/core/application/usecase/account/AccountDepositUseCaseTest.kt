@@ -102,7 +102,7 @@ class AccountDepositUseCaseTest {
         }
     }
 
-//    @Test
+    @Test
     fun `should persist deposit successfully`() {
         val depositResult = DepositResult(
             TestFixtures.transaction(),
@@ -116,6 +116,10 @@ class AccountDepositUseCaseTest {
         every {
             accountRepositoryPort.findById(TestFixtures.FROM_ACCOUNT_ID)
         } returns TestFixtures.fromAccount()
+
+        every {
+            eventPublisherPort.publish(any())
+        } just runs
 
         every {
             accountDomainService.deposit(TestFixtures.FROM_ACCOUNT_ID, amount)

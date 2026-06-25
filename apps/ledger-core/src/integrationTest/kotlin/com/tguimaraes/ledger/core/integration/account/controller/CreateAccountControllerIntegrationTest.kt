@@ -1,6 +1,5 @@
 package com.tguimaraes.ledger.core.integration.account.controller
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.tguimaraes.ledger.core.integration.support.AbstractIntegrationTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -18,9 +17,6 @@ class CreateAccountControllerIntegrationTest : AbstractIntegrationTest() {
 
     @Autowired
     private lateinit var mockMvc: MockMvc
-
-    @Autowired
-    private lateinit var objectMapper: ObjectMapper
 
     @BeforeEach
     fun setup() {
