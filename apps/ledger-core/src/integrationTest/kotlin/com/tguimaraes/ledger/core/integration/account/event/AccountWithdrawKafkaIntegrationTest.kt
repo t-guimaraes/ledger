@@ -1,6 +1,7 @@
 package com.tguimaraes.ledger.core.integration.account.event
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.tguimaraes.ledger.core.adapter.inbound.web.dto.account.AccountWithdrawRequest
 import com.tguimaraes.ledger.core.domain.event.EventEnvelope
 import com.tguimaraes.ledger.core.domain.event.account.AccountWithdrawEvent
 import com.tguimaraes.ledger.core.integration.support.AbstractIntegrationTest
@@ -36,17 +37,13 @@ class AccountWithdrawKafkaIntegrationTest : AbstractIntegrationTest() {
         createAccount(accountId, "Thiago Henrique")
         fundAccount(accountId, BigDecimal("1000.00"))
 
+        val request = AccountWithdrawRequest(BigDecimal("100.00"))
+
         RestAssured.given()
             .port(port)
             .contentType("application/json")
             .header("Idempotency-Key", "integration-key3")
-            .body(
-                """
-                {
-                  "amount": 100.00
-                }
-                """.trimIndent()
-            )
+            .body(request)
             .post("/accounts/$accountId/withdraw")
             .then()
             .statusCode(201)

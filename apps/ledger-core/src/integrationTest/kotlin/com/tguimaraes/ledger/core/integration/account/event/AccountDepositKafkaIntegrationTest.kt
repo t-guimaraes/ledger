@@ -1,6 +1,7 @@
 package com.tguimaraes.ledger.core.integration.account.event
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.tguimaraes.ledger.core.adapter.inbound.web.dto.account.AccountDepositRequest
 import com.tguimaraes.ledger.core.domain.event.EventEnvelope
 import com.tguimaraes.ledger.core.domain.event.account.AccountDepositEvent
 import com.tguimaraes.ledger.core.integration.support.AbstractIntegrationTest
@@ -35,17 +36,13 @@ class AccountDepositKafkaIntegrationTest : AbstractIntegrationTest() {
         val accountId = UUID.randomUUID()
         createAccount(accountId, "Thiago Henrique")
 
+        val request = AccountDepositRequest(BigDecimal("100.00"))
+
         RestAssured.given()
             .port(port)
             .contentType("application/json")
             .header("Idempotency-Key", "integration-key")
-            .body(
-                """
-                {
-                  "amount": 100.00
-                }
-                """.trimIndent()
-            )
+            .body(request)
             .post("/accounts/$accountId/deposit")
             .then()
             .statusCode(201)
