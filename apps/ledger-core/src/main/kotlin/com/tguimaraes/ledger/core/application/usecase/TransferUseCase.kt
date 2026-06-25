@@ -2,12 +2,15 @@ package com.tguimaraes.ledger.core.application.usecase
 
 import com.tguimaraes.ledger.core.application.dto.transfer.TransferCommand
 import com.tguimaraes.ledger.core.application.port.input.TransferInputPort
+import com.tguimaraes.ledger.core.application.port.output.event.EventPublisherPort
 import com.tguimaraes.ledger.core.application.port.output.idempotency.IdempotencyPort
 import com.tguimaraes.ledger.core.application.port.output.query.EntryQueryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.AccountRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.EntryRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.TransactionRepositoryPort
 import com.tguimaraes.ledger.core.domain.dto.TransferResult
+import com.tguimaraes.ledger.core.domain.event.account.AccountWithdrawEvent
+import com.tguimaraes.ledger.core.domain.event.transfer.TransferEvent
 import com.tguimaraes.ledger.core.domain.exception.AccountNotFoundException
 import com.tguimaraes.ledger.core.domain.exception.IdempotencyException
 import com.tguimaraes.ledger.core.domain.service.TransferDomainService
@@ -19,6 +22,7 @@ class TransferUseCase(
     private val entryRepositoryPort: EntryRepositoryPort,
     private val entryQueryPort: EntryQueryPort,
     private val idempotencyPort: IdempotencyPort,
+    private val eventPublisherPort: EventPublisherPort,
     private val transferDomainService: TransferDomainService
 ) : TransferInputPort {
 
@@ -37,6 +41,16 @@ class TransferUseCase(
         )
 
         persistTransfer(transferResult, idempotencyKey)
+
+        eventPublisherPort.publish(
+            TransferEvent(
+                transactionId = transferResult.transaction.id,
+                fromAccountId = fromAccount.id,
+                toAccountId = toAccount.id,
+                amount = transferResult.transaction.amount,
+                occurredAt = transferResult.transaction.createdAt
+            )
+        )
     }
 
     private fun validateIdempotency(idempotencyKey: String) {

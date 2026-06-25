@@ -1,4 +1,4 @@
-package com.tguimaraes.ledger.core.integration.transfer
+package com.tguimaraes.ledger.core.integration.transfer.usecase
 
 import com.tguimaraes.ledger.core.application.dto.transfer.TransferCommand
 import com.tguimaraes.ledger.core.application.port.input.TransferInputPort
@@ -7,12 +7,12 @@ import com.tguimaraes.ledger.core.domain.exception.IdempotencyException
 import com.tguimaraes.ledger.core.domain.exception.InsufficientBalanceException
 import com.tguimaraes.ledger.core.domain.model.EntryType
 import com.tguimaraes.ledger.core.integration.support.AbstractIntegrationTest
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
-import java.util.*
+import java.util.UUID
 
 class TransferUseCaseIntegrationTest: AbstractIntegrationTest() {
 
@@ -48,19 +48,19 @@ class TransferUseCaseIntegrationTest: AbstractIntegrationTest() {
             "integration-key"
         )
 
-        assertEquals(
+        Assertions.assertEquals(
             2,
             transactionRepository.count()
         )
 
         val entries = entryRepository.findAll()
 
-        assertEquals(
+        Assertions.assertEquals(
             1,
             entries.count { it.type == EntryType.DEBIT }
         )
 
-        assertEquals(
+        Assertions.assertEquals(
             2,
             entries.count { it.type == EntryType.CREDIT }
         )
@@ -71,17 +71,17 @@ class TransferUseCaseIntegrationTest: AbstractIntegrationTest() {
         val toBalance =
             entryRepository.getBalance(toAccountId)
 
-        assertEquals(
+        Assertions.assertEquals(
             BigDecimal("800.00"),
             fromBalance
         )
 
-        assertEquals(
+        Assertions.assertEquals(
             BigDecimal("200.00"),
             toBalance
         )
 
-        assertTrue(
+        Assertions.assertTrue(
             idempotencyRepository.existsById("integration-key")
         )
     }
@@ -91,7 +91,7 @@ class TransferUseCaseIntegrationTest: AbstractIntegrationTest() {
 
         createIdempotencyKey("duplicate-key")
 
-        assertThrows(IdempotencyException::class.java) {
+        Assertions.assertThrows(IdempotencyException::class.java) {
             transferInputPort.transfer(
                 TransferCommand(
                     fromAccountId = fromAccountId,
@@ -102,14 +102,14 @@ class TransferUseCaseIntegrationTest: AbstractIntegrationTest() {
             )
         }
 
-        assertEquals(1, transactionRepository.count())
-        assertEquals(1, entryRepository.count())
+        Assertions.assertEquals(1, transactionRepository.count())
+        Assertions.assertEquals(1, entryRepository.count())
     }
 
     @Test
     fun `should throw exception when source account does not exist`() {
 
-        assertThrows(AccountNotFoundException::class.java) {
+        Assertions.assertThrows(AccountNotFoundException::class.java) {
             transferInputPort.transfer(
                 TransferCommand(
                     fromAccountId = UUID.randomUUID(),
@@ -124,7 +124,7 @@ class TransferUseCaseIntegrationTest: AbstractIntegrationTest() {
     @Test
     fun `should throw exception when destination account does not exist`() {
 
-        assertThrows(AccountNotFoundException::class.java) {
+        Assertions.assertThrows(AccountNotFoundException::class.java) {
             transferInputPort.transfer(
                 TransferCommand(
                     fromAccountId = fromAccountId,
@@ -139,7 +139,7 @@ class TransferUseCaseIntegrationTest: AbstractIntegrationTest() {
     @Test
     fun `should throw exception when balance is insufficient`() {
 
-        assertThrows(InsufficientBalanceException::class.java) {
+        Assertions.assertThrows(InsufficientBalanceException::class.java) {
             transferInputPort.transfer(
                 TransferCommand(
                     fromAccountId = fromAccountId,
@@ -150,12 +150,12 @@ class TransferUseCaseIntegrationTest: AbstractIntegrationTest() {
             )
         }
 
-        assertEquals(
+        Assertions.assertEquals(
             1,
             transactionRepository.count()
         )
 
-        assertEquals(
+        Assertions.assertEquals(
             1,
             entryRepository.count()
         )

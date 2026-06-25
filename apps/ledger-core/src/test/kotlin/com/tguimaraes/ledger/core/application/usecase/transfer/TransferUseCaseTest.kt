@@ -1,5 +1,6 @@
 package com.tguimaraes.ledger.core.application.usecase.transfer
 
+import com.tguimaraes.ledger.core.application.port.output.event.EventPublisherPort
 import com.tguimaraes.ledger.core.application.port.output.idempotency.IdempotencyPort
 import com.tguimaraes.ledger.core.application.port.output.query.EntryQueryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.AccountRepositoryPort
@@ -27,6 +28,7 @@ class TransferUseCaseTest {
     private lateinit var entryRepositoryPort: EntryRepositoryPort
     private lateinit var entryQueryPort: EntryQueryPort
     private lateinit var idempotencyPort: IdempotencyPort
+    private val eventPublisherPort = mockk<EventPublisherPort>()
     private lateinit var transferDomainService: TransferDomainService
 
     private lateinit var useCase: TransferUseCase
@@ -47,6 +49,7 @@ class TransferUseCaseTest {
             entryRepositoryPort,
             entryQueryPort,
             idempotencyPort,
+            eventPublisherPort,
             transferDomainService
         )
     }
@@ -206,6 +209,10 @@ class TransferUseCaseTest {
 
         every {
             idempotencyPort.save(TestFixtures.IDEMPOTENCY_KEY)
+        } just runs
+
+        every {
+            eventPublisherPort.publish(any())
         } just runs
 
         useCase.transfer(

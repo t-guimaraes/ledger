@@ -101,6 +101,7 @@ class UseCaseConfig {
         entryRepositoryPort: EntryRepositoryPort,
         entryQueryPort: EntryQueryPort,
         idempotencyPort: IdempotencyPort,
+        eventPublisherPort: EventPublisherPort,
         transferDomainService: TransferDomainService,
         transactionManager: PlatformTransactionManager
     ): TransferInputPort {
@@ -111,6 +112,7 @@ class UseCaseConfig {
                 entryRepositoryPort,
                 entryQueryPort,
                 idempotencyPort,
+                eventPublisherPort,
                 transferDomainService
             ),
             TransactionTemplate(transactionManager)
