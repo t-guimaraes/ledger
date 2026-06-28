@@ -12,10 +12,8 @@ object OutboxMapper {
             aggregateType = domain.aggregateType,
             eventType = domain.eventType,
             payload = domain.payload,
-            status = domain.status,
-            retryCount = domain.retryCount,
-            createdAt = domain.createdAt,
-            publishedAt = domain.publishedAt
+            topic = domain.topic,
+            createdAt = domain.createdAt
         )
 
     fun toDomain(entity: OutboxJpaEntity) =
@@ -25,9 +23,7 @@ object OutboxMapper {
             aggregateType = entity.aggregateType,
             eventType = entity.eventType,
             payload = entity.payload,
-            status = entity.status,
-            retryCount = entity.retryCount,
+            topic = entity.topic,
             createdAt = entity.createdAt,
-            publishedAt = entity.publishedAt
         )
 }
