@@ -6,9 +6,9 @@
     "plugin.name": "pgoutput",
     "database.hostname": "postgres",
     "database.port": "5432",
-    "database.user": "ledger",
-    "database.password": "ledger",
-    "database.dbname": "ledger",
+    "database.user": "${USER}",
+    "database.password": "${PASSWORD}",
+    "database.dbname": "${DATABASE}",
     "topic.prefix": "ledger_cdc",
     "table.include.list": "public.outbox",
     "transforms": "outbox",
@@ -21,4 +21,3 @@
     "transforms.outbox.table.fields.additional.placement": "event_type:header:eventType,aggregate_type:header:aggregateType"
   }
 }
-
