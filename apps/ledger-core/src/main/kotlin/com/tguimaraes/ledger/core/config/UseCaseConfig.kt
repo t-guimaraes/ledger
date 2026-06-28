@@ -1,5 +1,6 @@
 package com.tguimaraes.ledger.core.config
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.tguimaraes.ledger.core.adapter.outbound.transaction.TransactionalAccountDepositAdapter
 import com.tguimaraes.ledger.core.adapter.outbound.transaction.TransactionalAccountWithdrawAdapter
 import com.tguimaraes.ledger.core.adapter.outbound.transaction.TransactionalCreateAccountAdapter
@@ -10,6 +11,7 @@ import com.tguimaraes.ledger.core.application.port.output.idempotency.Idempotenc
 import com.tguimaraes.ledger.core.application.port.output.query.EntryQueryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.AccountRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.EntryRepositoryPort
+import com.tguimaraes.ledger.core.application.port.output.repository.OutboxRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.TransactionRepositoryPort
 import com.tguimaraes.ledger.core.application.usecase.*
 import com.tguimaraes.ledger.core.domain.service.AccountDomainService
@@ -101,8 +103,9 @@ class UseCaseConfig {
         entryRepositoryPort: EntryRepositoryPort,
         entryQueryPort: EntryQueryPort,
         idempotencyPort: IdempotencyPort,
-        eventPublisherPort: EventPublisherPort,
+        outboxRepositoryPort: OutboxRepositoryPort,
         transferDomainService: TransferDomainService,
+        objectMapper: ObjectMapper,
         transactionManager: PlatformTransactionManager
     ): TransferInputPort {
         return TransactionalTransferAdapter(
@@ -112,8 +115,9 @@ class UseCaseConfig {
                 entryRepositoryPort,
                 entryQueryPort,
                 idempotencyPort,
-                eventPublisherPort,
-                transferDomainService
+                outboxRepositoryPort,
+                transferDomainService,
+                objectMapper
             ),
             TransactionTemplate(transactionManager)
         )

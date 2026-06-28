@@ -1,17 +1,21 @@
 package com.tguimaraes.ledger.core.application.usecase
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.tguimaraes.ledger.core.application.dto.transfer.TransferCommand
 import com.tguimaraes.ledger.core.application.port.input.TransferInputPort
-import com.tguimaraes.ledger.core.application.port.output.event.EventPublisherPort
 import com.tguimaraes.ledger.core.application.port.output.idempotency.IdempotencyPort
 import com.tguimaraes.ledger.core.application.port.output.query.EntryQueryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.AccountRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.EntryRepositoryPort
+import com.tguimaraes.ledger.core.application.port.output.repository.OutboxRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.TransactionRepositoryPort
 import com.tguimaraes.ledger.core.domain.dto.TransferResult
+import com.tguimaraes.ledger.core.domain.event.EventEnvelope
+import com.tguimaraes.ledger.core.domain.event.outbox.OutboxEvent
 import com.tguimaraes.ledger.core.domain.event.transfer.TransferEvent
 import com.tguimaraes.ledger.core.domain.exception.AccountNotFoundException
 import com.tguimaraes.ledger.core.domain.exception.IdempotencyException
+import com.tguimaraes.ledger.core.domain.model.Account
 import com.tguimaraes.ledger.core.domain.service.TransferDomainService
 import java.util.*
 
@@ -21,8 +25,9 @@ class TransferUseCase(
     private val entryRepositoryPort: EntryRepositoryPort,
     private val entryQueryPort: EntryQueryPort,
     private val idempotencyPort: IdempotencyPort,
-    private val eventPublisherPort: EventPublisherPort,
-    private val transferDomainService: TransferDomainService
+    private val outboxRepositoryPort: OutboxRepositoryPort,
+    private val transferDomainService: TransferDomainService,
+    private val objectMapper: ObjectMapper
 ) : TransferInputPort {
 
     override fun transfer(command: TransferCommand, idempotencyKey: String) {
@@ -40,16 +45,7 @@ class TransferUseCase(
         )
 
         persistTransfer(transferResult, idempotencyKey)
-
-        eventPublisherPort.publish(
-            TransferEvent(
-                transactionId = transferResult.transaction.id,
-                fromAccountId = fromAccount.id,
-                toAccountId = toAccount.id,
-                amount = transferResult.transaction.amount,
-                occurredAt = transferResult.transaction.createdAt
-            )
-        )
+        persistEvent(transferResult, fromAccount, toAccount)
     }
 
     private fun validateIdempotency(idempotencyKey: String) {
@@ -67,6 +63,34 @@ class TransferUseCase(
         transactionRepositoryPort.save(transferResult.transaction)
         entryRepositoryPort.saveAll(transferResult.entries)
         idempotencyPort.save(idempotencyKey)
+    }
+
+    private fun persistEvent(transferResult: TransferResult, fromAccount: Account, toAccount: Account) {
+        val eventType = TransferEvent::class.simpleName!!
+
+        val event = TransferEvent(
+            transactionId = transferResult.transaction.id,
+            fromAccountId = fromAccount.id,
+            toAccountId = toAccount.id,
+            amount = transferResult.transaction.amount,
+            occurredAt = transferResult.transaction.createdAt
+        )
+
+        val eventEnvelope = EventEnvelope(
+            eventType,
+            1,
+            data = event
+        )
+
+        outboxRepositoryPort.save(
+            OutboxEvent(
+                aggregateId = transferResult.transaction.id.toString(),
+                aggregateType = "TRANSFER",
+                eventType = eventType,
+                topic = "ledger-events",
+                payload = objectMapper.valueToTree(eventEnvelope)
+            )
+        )
     }
 
 }
