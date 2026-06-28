@@ -5,32 +5,33 @@ import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.AccountJpa
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.EntryJpaEntity
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.IdempotencyKeyJpaEntity
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.TransactionJpaEntity
-import com.tguimaraes.ledger.core.adapter.outbound.persistence.repository.AccountJpaRepository
-import com.tguimaraes.ledger.core.adapter.outbound.persistence.repository.EntryJpaRepository
-import com.tguimaraes.ledger.core.adapter.outbound.persistence.repository.IdempotencyKeyJpaRepository
-import com.tguimaraes.ledger.core.adapter.outbound.persistence.repository.TransactionJpaRepository
+import com.tguimaraes.ledger.core.adapter.outbound.persistence.repository.*
 import com.tguimaraes.ledger.core.domain.model.EntryType
 import com.tguimaraes.ledger.core.support.TestcontainersConfiguration
+import org.awaitility.Awaitility
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.context.annotation.Import
-import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.test.context.ActiveProfiles
 import java.math.BigDecimal
+import java.time.Duration
 import java.time.Instant
 import java.util.*
+import java.util.concurrent.CopyOnWriteArrayList
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Import(TestcontainersConfiguration::class)
 abstract class AbstractIntegrationTest {
 
-    @Autowired
-    lateinit var kafkaTemplate: KafkaTemplate<String, String>
+    protected val receivedEvents = CopyOnWriteArrayList<String>()
+    protected val receivedEventTypes = CopyOnWriteArrayList<String>()
+
+    protected lateinit var fromAccountId: UUID
+    protected lateinit var toAccountId: UUID
 
     @Autowired
-    lateinit var objectMapper: ObjectMapper
+    protected lateinit var objectMapper: ObjectMapper
 
     @Autowired
     protected lateinit var entryRepository: EntryJpaRepository
@@ -44,21 +45,15 @@ abstract class AbstractIntegrationTest {
     @Autowired
     protected lateinit var idempotencyRepository: IdempotencyKeyJpaRepository
 
-    @LocalServerPort
-    var port: Int = 8080
-
-    protected lateinit var fromAccountId: UUID
-    protected lateinit var toAccountId: UUID
+    @Autowired
+    protected lateinit var outboxEventRepository: OutboxJpaRepository
 
     protected fun cleanDatabase() {
         idempotencyRepository.deleteAll()
         entryRepository.deleteAll()
         transactionRepository.deleteAll()
         accountRepository.deleteAll()
-    }
-
-    protected fun cleanEnvironment() {
-        cleanDatabase()
+        outboxEventRepository.deleteAll()
     }
 
     protected fun createIdempotencyKey(key: String) {
@@ -106,5 +101,11 @@ abstract class AbstractIntegrationTest {
                 createdAt = Instant.now()
             )
         )
+    }
+
+    protected fun awaitEvents() {
+        Awaitility.await().atMost(Duration.ofSeconds(5)).until {
+            receivedEvents.isNotEmpty()
+        }
     }
 }
