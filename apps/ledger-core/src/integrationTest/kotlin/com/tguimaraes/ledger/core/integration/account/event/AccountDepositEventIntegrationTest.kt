@@ -1,10 +1,10 @@
-package com.tguimaraes.ledger.core.integration.transfer.event
+package com.tguimaraes.ledger.core.integration.account.event
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.tguimaraes.ledger.core.application.dto.transfer.TransferCommand
-import com.tguimaraes.ledger.core.application.port.input.TransferInputPort
+import com.tguimaraes.ledger.core.application.dto.account.AccountDepositCommand
+import com.tguimaraes.ledger.core.application.port.input.AccountDepositInputPort
 import com.tguimaraes.ledger.core.domain.event.EventEnvelope
-import com.tguimaraes.ledger.core.domain.event.transfer.TransferEvent
+import com.tguimaraes.ledger.core.domain.event.account.AccountDepositEvent
 import com.tguimaraes.ledger.core.integration.support.AbstractIntegrationTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -16,14 +16,14 @@ import org.springframework.messaging.handler.annotation.Payload
 import java.math.BigDecimal
 import java.util.*
 
-class TransferEventIntegrationTest : AbstractIntegrationTest() {
+class AccountDepositEventIntegrationTest : AbstractIntegrationTest() {
 
     @Autowired
-    private lateinit var transferInputPort: TransferInputPort
+    private lateinit var accountDepositInputPort: AccountDepositInputPort
 
     @KafkaListener(
         topics = ["#{@kafkaConfig.ledgerEventsTopic}"],
-        groupId = "integration-test-transfer-event")
+        groupId = "integration-test-account-deposit-event")
     fun listen(@Payload message: String, @Header("eventType") eventType: String) {
         receivedMessages.add(KafkaTestMessage(message, eventType))
     }
@@ -35,27 +35,22 @@ class TransferEventIntegrationTest : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `should receive transfer event triggered by Debezium from the outbox`() {
+    fun `should receive account deposit event triggered by Debezium from the outbox`() {
         fromAccountId = UUID.randomUUID().also {
             createAccount(it, "Thiago")
-            fundAccount(it, BigDecimal("1000.00"))
-        }
-        toAccountId = UUID.randomUUID().also {
-            createAccount(it, "Maria")
         }
 
-        val command = TransferCommand(fromAccountId, toAccountId, BigDecimal("200.00"))
-        transferInputPort.transfer(command,"integration-key")
+        val command = AccountDepositCommand(BigDecimal("1000.00"))
+        accountDepositInputPort.deposit(command, fromAccountId,"integration-key")
 
-        val eventType = "TransferEvent"
+        val eventType = "AccountDepositEvent"
         awaitEvents(eventType, fromAccountId.toString())
 
         val message = receivedMessages.last { it.type == eventType }.payload
-        val event: EventEnvelope<TransferEvent> = objectMapper.readValue(message)
+        val event: EventEnvelope<AccountDepositEvent> = objectMapper.readValue(message)
 
-        assertThat(event.data.fromAccountId).isEqualTo(fromAccountId)
-        assertThat(event.data.toAccountId).isEqualTo(toAccountId)
-        assertThat(event.data.amount).isEqualByComparingTo(BigDecimal("200.00"))
+        assertThat(event.data.accountId).isEqualTo(fromAccountId)
+        assertThat(event.data.amount).isEqualByComparingTo(BigDecimal("1000.00"))
 
         assertThat(outboxEventRepository.count()).isEqualTo(1)
     }

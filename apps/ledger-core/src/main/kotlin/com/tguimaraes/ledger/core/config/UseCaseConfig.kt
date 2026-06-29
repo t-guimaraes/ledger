@@ -30,7 +30,7 @@ class UseCaseConfig {
         transactionManager: PlatformTransactionManager
     ): CreateAccountInputPort {
         return TransactionalCreateAccountAdapter(
-            CreateAccountUseCase(accountRepository),
+            AccountCreateUseCase(accountRepository),
             TransactionTemplate(transactionManager)
         )
     }
@@ -41,8 +41,10 @@ class UseCaseConfig {
         transactionRepositoryPort: TransactionRepositoryPort,
         entryRepositoryPort: EntryRepositoryPort,
         idempotencyPort: IdempotencyPort,
-        eventPublisherPort: EventPublisherPort,
+        outboxRepositoryPort: OutboxRepositoryPort,
         accountDomainService: AccountDomainService,
+        objectMapper: ObjectMapper,
+        kafkaConfig: KafkaConfig,
         transactionManager: PlatformTransactionManager
     ): AccountDepositInputPort {
         return TransactionalAccountDepositAdapter(
@@ -51,8 +53,11 @@ class UseCaseConfig {
                 transactionRepositoryPort,
                 entryRepositoryPort,
                 idempotencyPort,
-                eventPublisherPort,
-                accountDomainService),
+                outboxRepositoryPort,
+                accountDomainService,
+                objectMapper,
+                kafkaConfig
+            ),
             TransactionTemplate(transactionManager)
         )
     }
@@ -62,9 +67,12 @@ class UseCaseConfig {
         accountRepositoryPort: AccountRepositoryPort,
         transactionRepositoryPort: TransactionRepositoryPort,
         entryRepositoryPort: EntryRepositoryPort,
+        entryQueryPort: EntryQueryPort,
         idempotencyPort: IdempotencyPort,
-        eventPublisherPort: EventPublisherPort,
+        outboxRepositoryPort: OutboxRepositoryPort,
         accountDomainService: AccountDomainService,
+        objectMapper: ObjectMapper,
+        kafkaConfig: KafkaConfig,
         transactionManager: PlatformTransactionManager
     ): AccountWithdrawInputPort {
         return TransactionalAccountWithdrawAdapter(
@@ -72,9 +80,12 @@ class UseCaseConfig {
                 accountRepositoryPort,
                 transactionRepositoryPort,
                 entryRepositoryPort,
+                entryQueryPort,
                 idempotencyPort,
-                eventPublisherPort,
-                accountDomainService
+                outboxRepositoryPort,
+                accountDomainService,
+                objectMapper,
+                kafkaConfig,
             ),
             TransactionTemplate(transactionManager)
         )
@@ -106,6 +117,7 @@ class UseCaseConfig {
         outboxRepositoryPort: OutboxRepositoryPort,
         transferDomainService: TransferDomainService,
         objectMapper: ObjectMapper,
+        kafkaConfig: KafkaConfig,
         transactionManager: PlatformTransactionManager
     ): TransferInputPort {
         return TransactionalTransferAdapter(
@@ -117,7 +129,8 @@ class UseCaseConfig {
                 idempotencyPort,
                 outboxRepositoryPort,
                 transferDomainService,
-                objectMapper
+                objectMapper,
+                kafkaConfig
             ),
             TransactionTemplate(transactionManager)
         )

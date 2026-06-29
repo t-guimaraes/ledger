@@ -9,6 +9,7 @@ import com.tguimaraes.ledger.core.application.port.output.repository.AccountRepo
 import com.tguimaraes.ledger.core.application.port.output.repository.EntryRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.OutboxRepositoryPort
 import com.tguimaraes.ledger.core.application.port.output.repository.TransactionRepositoryPort
+import com.tguimaraes.ledger.core.config.KafkaConfig
 import com.tguimaraes.ledger.core.domain.dto.TransferResult
 import com.tguimaraes.ledger.core.domain.event.EventEnvelope
 import com.tguimaraes.ledger.core.domain.event.outbox.OutboxEvent
@@ -27,7 +28,8 @@ class TransferUseCase(
     private val idempotencyPort: IdempotencyPort,
     private val outboxRepositoryPort: OutboxRepositoryPort,
     private val transferDomainService: TransferDomainService,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val kafkaConfig: KafkaConfig,
 ) : TransferInputPort {
 
     override fun transfer(command: TransferCommand, idempotencyKey: String) {
@@ -87,10 +89,9 @@ class TransferUseCase(
                 aggregateId = transferResult.transaction.id.toString(),
                 aggregateType = "TRANSFER",
                 eventType = eventType,
-                topic = "ledger-events",
+                topic = kafkaConfig.ledgerEventsTopic,
                 payload = objectMapper.valueToTree(eventEnvelope)
             )
         )
     }
-
 }

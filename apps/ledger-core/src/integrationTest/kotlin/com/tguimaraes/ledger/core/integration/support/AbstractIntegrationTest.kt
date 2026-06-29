@@ -6,13 +6,16 @@ import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.EntryJpaEn
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.IdempotencyKeyJpaEntity
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.entity.TransactionJpaEntity
 import com.tguimaraes.ledger.core.adapter.outbound.persistence.repository.*
+import com.tguimaraes.ledger.core.config.KafkaConfig
 import com.tguimaraes.ledger.core.domain.model.EntryType
 import com.tguimaraes.ledger.core.support.TestcontainersConfiguration
 import org.awaitility.Awaitility
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.web.servlet.MockMvc
 import java.math.BigDecimal
 import java.time.Duration
 import java.time.Instant
@@ -22,13 +25,20 @@ import java.util.concurrent.CopyOnWriteArrayList
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Import(TestcontainersConfiguration::class)
+@AutoConfigureMockMvc
 abstract class AbstractIntegrationTest {
 
-    protected val receivedEvents = CopyOnWriteArrayList<String>()
-    protected val receivedEventTypes = CopyOnWriteArrayList<String>()
+    data class KafkaTestMessage(val payload: String, val type: String)
+    protected val receivedMessages = CopyOnWriteArrayList<KafkaTestMessage>()
 
     protected lateinit var fromAccountId: UUID
     protected lateinit var toAccountId: UUID
+
+    @Autowired
+    protected lateinit var kafkaConfig: KafkaConfig
+
+    @Autowired
+    protected lateinit var mockMvc: MockMvc
 
     @Autowired
     protected lateinit var objectMapper: ObjectMapper
@@ -47,6 +57,10 @@ abstract class AbstractIntegrationTest {
 
     @Autowired
     protected lateinit var outboxEventRepository: OutboxJpaRepository
+
+    companion object {
+        protected const val EVENTS_TOPIC = "ledger-events"
+    }
 
     protected fun cleanDatabase() {
         idempotencyRepository.deleteAll()
@@ -103,9 +117,9 @@ abstract class AbstractIntegrationTest {
         )
     }
 
-    protected fun awaitEvents() {
+    protected fun awaitEvents(eventType: String, contains: String) {
         Awaitility.await().atMost(Duration.ofSeconds(5)).until {
-            receivedEvents.isNotEmpty()
+            receivedMessages.any { it.type == eventType && it.payload.contains(contains) }
         }
     }
 }
