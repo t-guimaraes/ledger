@@ -8,23 +8,17 @@ import com.tguimaraes.ledger.core.domain.model.Account
 import java.time.Instant
 import java.util.*
 
-class CreateAccountUseCase(
+class AccountCreateUseCase(
     private val accountRepository: AccountRepositoryPort
 ) : CreateAccountInputPort {
 
     override fun execute(command: CreateAccountCommand): CreateAccountResult {
 
         val ownerName = Account.normalizeOwnerName(command.ownerName)
-        val account = Account.create(
-            id = UUID.randomUUID(),
-            ownerName = ownerName,
-            createdAt = Instant.now()
-        )
+        val account = Account.create(UUID.randomUUID(),ownerName,Instant.now())
 
         accountRepository.save(account)
 
-        return CreateAccountResult(
-            accountId = account.id
-        )
+        return CreateAccountResult(accountId = account.id)
     }
 }

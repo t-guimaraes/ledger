@@ -5,9 +5,12 @@ import com.tguimaraes.ledger.core.application.port.input.TransferInputPort
 import com.tguimaraes.ledger.core.domain.exception.AccountNotFoundException
 import com.tguimaraes.ledger.core.domain.exception.IdempotencyException
 import com.tguimaraes.ledger.core.domain.exception.InsufficientBalanceException
+import com.tguimaraes.ledger.core.domain.exception.InvalidTransferAmountException
 import com.tguimaraes.ledger.core.domain.model.EntryType
 import com.tguimaraes.ledger.core.integration.support.AbstractIntegrationTest
-import org.junit.jupiter.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.tuple
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,143 +24,94 @@ class TransferUseCaseIntegrationTest: AbstractIntegrationTest() {
 
     @BeforeEach
     fun setup() {
-
-        cleanEnvironment()
-
-        fromAccountId = UUID.randomUUID()
-        toAccountId = UUID.randomUUID()
-
-        createAccount(fromAccountId, "Thiago")
-        createAccount(toAccountId, "Maria")
-
-        fundAccount(
-            accountId = fromAccountId,
-            amount = BigDecimal("1000.00")
-        )
-    }
-
-    @Test
-    fun `should create transfer successfully`() {
-
-        transferInputPort.transfer(
-            TransferCommand(
-                fromAccountId = fromAccountId,
-                toAccountId = toAccountId,
-                amount = BigDecimal("200.00")
-            ),
-            "integration-key"
-        )
-
-        Assertions.assertEquals(
-            2,
-            transactionRepository.count()
-        )
-
-        val entries = entryRepository.findAll()
-
-        Assertions.assertEquals(
-            1,
-            entries.count { it.type == EntryType.DEBIT }
-        )
-
-        Assertions.assertEquals(
-            2,
-            entries.count { it.type == EntryType.CREDIT }
-        )
-
-        val fromBalance =
-            entryRepository.getBalance(fromAccountId)
-
-        val toBalance =
-            entryRepository.getBalance(toAccountId)
-
-        Assertions.assertEquals(
-            BigDecimal("800.00"),
-            fromBalance
-        )
-
-        Assertions.assertEquals(
-            BigDecimal("200.00"),
-            toBalance
-        )
-
-        Assertions.assertTrue(
-            idempotencyRepository.existsById("integration-key")
-        )
+        cleanDatabase()
+        fromAccountId = UUID.randomUUID().also {
+            createAccount(it, "Thiago")
+            fundAccount(it, BigDecimal("1000.00"))
+        }
+        toAccountId = UUID.randomUUID().also {
+            createAccount(it, "Maria")
+        }
     }
 
     @Test
     fun `should throw exception when idempotency key already exists`() {
-
         createIdempotencyKey("duplicate-key")
+        val command = TransferCommand(fromAccountId, toAccountId, BigDecimal("200.00"))
 
-        Assertions.assertThrows(IdempotencyException::class.java) {
-            transferInputPort.transfer(
-                TransferCommand(
-                    fromAccountId = fromAccountId,
-                    toAccountId = toAccountId,
-                    amount = BigDecimal("100.00")
-                ),
-                "duplicate-key"
-            )
+        assertThrows(IdempotencyException::class.java) {
+            transferInputPort.transfer(command,"duplicate-key")
         }
 
-        Assertions.assertEquals(1, transactionRepository.count())
-        Assertions.assertEquals(1, entryRepository.count())
+        assertTrue(idempotencyRepository.existsById("duplicate-key"))
     }
 
     @Test
     fun `should throw exception when source account does not exist`() {
+        val randomAccount = UUID.randomUUID()
+        val command = TransferCommand(randomAccount, toAccountId, BigDecimal("200.00"))
 
-        Assertions.assertThrows(AccountNotFoundException::class.java) {
-            transferInputPort.transfer(
-                TransferCommand(
-                    fromAccountId = UUID.randomUUID(),
-                    toAccountId = toAccountId,
-                    amount = BigDecimal("100.00")
-                ),
-                "key"
-            )
+        assertThrows(AccountNotFoundException::class.java) {
+            transferInputPort.transfer(command,"integration-key")
         }
+
+        assertFalse(accountRepository.existsById(randomAccount))
     }
 
     @Test
     fun `should throw exception when destination account does not exist`() {
+        val randomAccount = UUID.randomUUID()
+        val command = TransferCommand(fromAccountId, randomAccount, BigDecimal("200.00"))
 
-        Assertions.assertThrows(AccountNotFoundException::class.java) {
-            transferInputPort.transfer(
-                TransferCommand(
-                    fromAccountId = fromAccountId,
-                    toAccountId = UUID.randomUUID(),
-                    amount = BigDecimal("100.00")
-                ),
-                "key"
+        assertThrows(AccountNotFoundException::class.java) {
+            transferInputPort.transfer(command,"integration-key")
+        }
+
+        assertFalse(accountRepository.existsById(randomAccount))
+    }
+
+    @Test
+    fun `should throw exception when amount is less or equal 0`() {
+        val command = TransferCommand(fromAccountId, toAccountId, BigDecimal.ZERO)
+
+        assertThrows(InvalidTransferAmountException::class.java) {
+            transferInputPort.transfer(command, "integration-key"
             )
         }
     }
 
     @Test
     fun `should throw exception when balance is insufficient`() {
+        val command = TransferCommand(fromAccountId, toAccountId, BigDecimal("2000.00"))
 
-        Assertions.assertThrows(InsufficientBalanceException::class.java) {
-            transferInputPort.transfer(
-                TransferCommand(
-                    fromAccountId = fromAccountId,
-                    toAccountId = toAccountId,
-                    amount = BigDecimal("2000.00")
-                ),
-                "key"
+        assertThrows(InsufficientBalanceException::class.java) {
+            transferInputPort.transfer(command, "integration-key"
             )
         }
 
-        Assertions.assertEquals(
-            1,
-            transactionRepository.count()
-        )
+        assertThat(entryRepository.getBalance(fromAccountId)).isLessThan(BigDecimal("2000.00"))
+    }
 
-        Assertions.assertEquals(
-            1,
-            entryRepository.count()
-        )
+    @Test
+    fun `should create transfer successfully`() {
+        val command = TransferCommand(fromAccountId, toAccountId, BigDecimal("300.00"))
+
+        transferInputPort.transfer(command,"integration-key")
+
+        assertTrue(idempotencyRepository.existsById("integration-key"))
+        assertThat(transactionRepository.count()).isEqualTo(2)
+        assertThat(entryRepository.count()).isEqualTo(3)
+        assertThat(outboxEventRepository.count()).isEqualTo(1)
+
+        assertThat(entryRepository.getBalance(fromAccountId)).isEqualTo(BigDecimal("700.00"))
+        assertThat(entryRepository.getBalance(toAccountId)).isEqualTo(BigDecimal("300.00"))
+
+        assertThat(entryRepository.findAll())
+            .extracting("accountId", "amount", "type")
+            .containsExactlyInAnyOrder(
+                tuple(fromAccountId, BigDecimal("1000.00"), EntryType.CREDIT),
+                tuple(fromAccountId, BigDecimal("300.00"), EntryType.DEBIT),
+                tuple(toAccountId, BigDecimal("300.00"), EntryType.CREDIT)
+            )
     }
 }

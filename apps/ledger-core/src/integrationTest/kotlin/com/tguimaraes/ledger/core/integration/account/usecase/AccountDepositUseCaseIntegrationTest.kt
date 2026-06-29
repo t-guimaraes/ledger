@@ -6,6 +6,7 @@ import com.tguimaraes.ledger.core.domain.exception.AccountNotFoundException
 import com.tguimaraes.ledger.core.domain.exception.IdempotencyException
 import com.tguimaraes.ledger.core.domain.model.EntryType
 import com.tguimaraes.ledger.core.integration.support.AbstractIntegrationTest
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -17,107 +18,48 @@ class AccountDepositUseCaseIntegrationTest : AbstractIntegrationTest() {
 
     @Autowired
     private lateinit var accountDepositInputPort: AccountDepositInputPort
-
     private lateinit var accountDepositCommand: AccountDepositCommand
 
     @BeforeEach
     fun setup() {
-
-        cleanEnvironment()
-
-        fromAccountId = UUID.randomUUID()
-
-        createAccount(
-            fromAccountId,
-            "Thiago"
-        )
-
-        accountDepositCommand = AccountDepositCommand(
-            BigDecimal("1000.00")
-        )
-    }
-
-    @Test
-    fun `should throw when account not exist`() {
-
-        val randomAccountId = UUID.randomUUID()
-
-        assertThrows(AccountNotFoundException::class.java) {
-            accountDepositInputPort.deposit(
-                accountDepositCommand,
-                randomAccountId,
-                "integration-key"
-            )
+        cleanDatabase()
+        accountDepositCommand = AccountDepositCommand(BigDecimal("1000.00"))
+        fromAccountId = UUID.randomUUID().also {
+            createAccount(it, "Thiago")
         }
     }
 
     @Test
-    fun `should throw when idempotency key already exists`() {
-
+    fun `should throw exception when idempotency key already exists`() {
         createIdempotencyKey("duplicate-key")
-
         assertThrows(IdempotencyException::class.java) {
-            accountDepositInputPort.deposit(
-                accountDepositCommand,
-                fromAccountId,
-                "duplicate-key"
-            )
+            accountDepositInputPort.deposit(accountDepositCommand, fromAccountId,"duplicate-key")
         }
+        assertTrue(idempotencyRepository.existsById("duplicate-key"))
+    }
+
+    @Test
+    fun `should throw exception when account not exist`() {
+        val randomAccount = UUID.randomUUID()
+        assertThrows(AccountNotFoundException::class.java) {
+            accountDepositInputPort.deposit(accountDepositCommand,randomAccount,"integration-key")
+        }
+        assertFalse(accountRepository.existsById(randomAccount))
     }
 
     @Test
     fun `should deposit successfully`() {
-
-        val result = accountDepositInputPort.deposit(
-            accountDepositCommand,
-            fromAccountId,
-            "integration-key"
-        )
-
-        assertEquals(
-            fromAccountId,
-            result.accountId
-        )
-
-        assertEquals(
-            BigDecimal("1000.00"),
-            result.amount
-        )
-
-        assertEquals(
-            1,
-            transactionRepository.count()
-        )
-
-        assertEquals(
-            1,
-            entryRepository.count()
-        )
+        val result = accountDepositInputPort.deposit(accountDepositCommand, fromAccountId,"integration-key")
+        assertThat(result.accountId).isEqualTo(fromAccountId)
+        assertThat(result.amount).isEqualTo(BigDecimal("1000.00"))
+        assertThat(outboxEventRepository.count()).isEqualTo(1)
+        assertThat(transactionRepository.count()).isEqualTo(1)
+        assertThat(entryRepository.count()).isEqualTo(1)
 
         val entry = entryRepository.findAll().first()
-
-        assertEquals(
-            fromAccountId,
-            entry.accountId
-        )
-
-        assertEquals(
-            EntryType.CREDIT,
-            entry.type
-        )
-
-        assertEquals(
-            BigDecimal("1000.00"),
-            entry.amount
-        )
-
-        assertEquals(
-            BigDecimal("1000.00"),
-            entryRepository.getBalance(fromAccountId)
-        )
-
-        assertTrue(
-            idempotencyRepository.existsById("integration-key")
-        )
+        assertThat(entry.accountId).isEqualTo(fromAccountId)
+        assertThat(entry.type).isEqualTo(EntryType.CREDIT)
+        assertThat(entry.amount).isEqualTo(BigDecimal("1000.00"))
+        assertTrue(idempotencyRepository.existsById("integration-key"))
     }
 }

@@ -2,6 +2,7 @@ package com.tguimaraes.ledger.core.domain.service
 
 import com.tguimaraes.ledger.core.domain.dto.DepositResult
 import com.tguimaraes.ledger.core.domain.dto.WithdrawResult
+import com.tguimaraes.ledger.core.domain.exception.InsufficientBalanceException
 import com.tguimaraes.ledger.core.domain.exception.InvalidAccountDepositAmountException
 import com.tguimaraes.ledger.core.domain.exception.InvalidAccountWithdrawAmountException
 import com.tguimaraes.ledger.core.domain.model.Entry
@@ -24,8 +25,9 @@ class AccountDomainService {
         )
     }
 
-    fun withdraw(accountId: UUID, amount: BigDecimal): WithdrawResult {
+    fun withdraw(accountId: UUID, amount: BigDecimal, balance: BigDecimal): WithdrawResult {
         validateAmount(amount, EntryType.DEBIT)
+        validateBalance(balance, amount)
 
         val transaction = createTransaction(amount)
         val entry = createEntry(transaction, accountId, amount, EntryType.DEBIT)
@@ -66,5 +68,14 @@ class AccountDomainService {
             amount = amount,
             createdAt = Instant.now()
         )
+    }
+
+    private fun validateBalance(
+        balance: BigDecimal,
+        amount: BigDecimal
+    ) {
+        if (balance < amount) {
+            throw InsufficientBalanceException()
+        }
     }
 }

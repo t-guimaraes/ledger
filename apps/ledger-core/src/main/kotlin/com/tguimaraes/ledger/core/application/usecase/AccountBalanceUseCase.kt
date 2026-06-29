@@ -11,7 +11,6 @@ class AccountBalanceUseCase(
     private val entryQueryPort: EntryQueryPort,
     private val accountRepositoryPort: AccountRepositoryPort
 ): AccountBalanceInputPort {
-
     override fun execute(accountId: UUID): AccountBalanceResult {
 
         accountRepositoryPort.findById(accountId) ?: throw AccountNotFoundException(accountId)
